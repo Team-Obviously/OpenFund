@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { IUser } from "./user.model";
 import { IDonations } from "./donations.model";
+import { IIssue } from "./issue.model";
 
 export interface IRepository extends Document {
   name: string;
@@ -11,6 +12,8 @@ export interface IRepository extends Document {
   maintainer: IUser;
   donators: IUser[];
   donations: IDonations[];
+  contributors: IUser[];
+  issues: IIssue[];
 }
 
 const repositorySchema = new Schema<IRepository>(
@@ -34,6 +37,10 @@ const repositorySchema = new Schema<IRepository>(
     donators: {
       type: [Schema.Types.ObjectId],
       ref: "User",
+    },
+    issues: {
+      type: [Schema.Types.ObjectId],
+      ref: "Issue",
     },
   },
   {
