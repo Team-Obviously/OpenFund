@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@boundaryml/baml-darwin-arm64@0.69.0":
+"@boundaryml/baml-win32-x64-msvc@0.69.0":
   version "0.69.0"
-  resolved "https://registry.npmjs.org/@boundaryml/baml-darwin-arm64/-/baml-darwin-arm64-0.69.0.tgz"
-  integrity sha512-yoD3iSmv2DYUFssVBFn6thaga3t4mTqXfdkbtLdUlWcX2JIFzEHIj+C6w9yO5y1UMyUh6fHuTQvIgp5c1Y7c0g==
+  resolved "https://registry.npmjs.org/@boundaryml/baml-win32-x64-msvc/-/baml-win32-x64-msvc-0.69.0.tgz"
+  integrity sha512-uwQAYkxfL94/KvnjeFtiYQsyOdpp0jdEZqsmFeEyv2Nld3WFKFc2144CjwD28lh19bjtW/8g9kEtftyo2QAX6Q==
 
 "@boundaryml/baml@^0.69.0":
   version "0.69.0"
@@ -1069,11 +1069,6 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
-
-fsevents@~2.3.2:
-  version "2.3.3"
-  resolved "https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz"
-  integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
 
 fstream@^1.0.12:
   version "1.0.12"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import {
   SidebarInset,
@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { getRequest } from '@/utility/generalServices'
 
 type Donation = {
   id: string
@@ -49,7 +50,23 @@ export function DonatorDashboard() {
   const [selectedProject, setSelectedProject] = useState<string>('')
   const [amount, setAmount] = useState<string>('')
   const [showThankYou, setShowThankYou] = useState(false)
-  const [donationDialog, setDonationDialog] = useState(false)
+  const [donationDialog, setDonationDialog] = useState(false);
+  const [organisations, setOrganisations] = useState<any>();
+
+  useEffect(()=> {
+    getAllOrganisations();  
+  }, [])
+
+
+  const getAllOrganisations = async () => {
+    const response = await getRequest('/organisations/all');
+    console.log('ALLORGS:: ', response.data);
+    setOrganisations(response.data);
+  };
+
+  const getAllDonatedRepositories = async () => {
+    const response = await getRequest('/repositories/my');
+  }
 
   // Mock organizations data
   const organizations: Organization[] = [

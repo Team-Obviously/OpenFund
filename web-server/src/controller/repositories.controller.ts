@@ -5,7 +5,7 @@ import User from "../models/user.model";
 import Repository from "../models/repository.model";
 import { IUser } from "../models/user.model";
 import Donations from "../models/donations.model";
-import Issue from "../models/issue.model";
+import { Issue } from "../models/issue.model";
 
 export const getAllRepositories = catchAsync(
   async (req: Request, res: Response) => {
