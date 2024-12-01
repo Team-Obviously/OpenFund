@@ -18,13 +18,13 @@ import { useOkto } from 'okto-sdk-react'
 import { Link } from 'react-router-dom'
 import { DashboardNav } from '@/components/ui/dashboard-nav'
 
-interface Organization {
-  _id: string
-  name: string
-  description: string
-  totalProjects: number
-  githubUrl: string
-}
+// interface Organization {
+//   _id: string
+//   name: string
+//   description: string
+//   totalProjects: number
+//   githubUrl: string
+// }
 
 interface Donation {
   _id: string
