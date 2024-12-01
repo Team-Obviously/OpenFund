@@ -19,4 +19,14 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+export const closeIssue = catchAsync(async (req: Request, res: Response) => {
+  const { issue, contributors, linkedPRs } = req.body;
+  console.log(req.body.issue.number);
+  console.log(req.body.issue.title);
+
+  res.status(200).json({
+    status: "success",
+    message: "Issue closed successfully",
+  });
+});
 

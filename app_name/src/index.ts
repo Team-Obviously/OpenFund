@@ -1,5 +1,16 @@
 // @ts-nocheck
 import { Probot } from "probot";
+const BASE_URL = "http://localhost:3001/api/bot"
+
+const fetchFunction = (path,body) => {
+  fetch(`${BASE_URL}/${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}
 
 export default (app: Probot) => {
 
@@ -19,21 +30,17 @@ export default (app: Probot) => {
 
     if (comment.body.includes("@openfund-bot")) {
       console.log("Bot was mentioned in the comment");
-      fetch("http://localhost:3001/api/bot/comment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(comment),
-      })
+      fetchFunction("comment",comment)
     }
   });
 
   app.on("issues.closed", async (context) => {
     const issue = context.payload.issue;
+    
+    
+
     const repo = context.repo();
 
-    // Get linked PRs through the search API
     const searchResult = await context.octokit.search.issuesAndPullRequests({
       q: `${issue.number} type:pr repo:${repo.owner}/${repo.repo}`,
     });
@@ -61,5 +68,11 @@ export default (app: Probot) => {
     console.log(`Issue #${issue.number} was closed`);
     console.log('Linked PRs:', linkedPRs.map(pr => `#${pr.number}`).join(', ') || 'None');
     console.log('Contributors:', Array.from(contributors).join(', ') || 'None');
+
+    fetchFunction("closed",{
+      issue: issue,
+      contributors: Array.from(contributors),
+      linkedPRs: Array.from(linkedPRs)
+    })
   });
 };

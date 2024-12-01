@@ -26,31 +26,20 @@ const octokit = new Octokit({
 
 // Endpoint to add a comment to a GitHub issue
 app.post("/add-comment", async (req, res) => {
-  const { owner, repo, issue_number, comment, labels } = req.body;
+  const { owner, repo, issue_number, comment } = req.body;
 
   if (!owner || !repo || !issue_number || !comment) {
     return res.status(400).json({
-      error:
-        "Please provide 'owner', 'repo', 'issue_number', and 'comment' in the request body.",
+      error: "Please provide 'owner', 'repo', 'issue_number', and 'comment' in the request body.",
     });
   }
-const {
-    data: { slug },
-  } = await octokit.rest.apps.getAuthenticated();
+
   try {
-    // Use Octokit to create a comment
     const response = await octokit.issues.createComment({
       owner,
       repo,
       issue_number,
       body: comment,
-    });
-
-    octokit.rest.issues.addLabels({
-      owner,
-      repo,
-      issue_number,
-      labels: labels,
     });
 
     return res.status(200).json({
@@ -61,6 +50,36 @@ const {
     console.error("Error adding comment:", error);
     return res.status(500).json({
       error: "Failed to add comment. Please check your inputs and try again.",
+    });
+  }
+});
+
+// New endpoint to add labels to a GitHub issue
+app.post("/add-labels", async (req, res) => {
+  const { owner, repo, issue_number, labels } = req.body;
+
+  if (!owner || !repo || !issue_number || !labels) {
+    return res.status(400).json({
+      error: "Please provide 'owner', 'repo', 'issue_number', and 'labels' in the request body.",
+    });
+  }
+
+  try {
+    const response = await octokit.rest.issues.addLabels({
+      owner,
+      repo,
+      issue_number,
+      labels,
+    });
+
+    return res.status(200).json({
+      message: "Labels added successfully!",
+      labels: response.data,
+    });
+  } catch (error) {
+    console.error("Error adding labels:", error);
+    return res.status(500).json({
+      error: "Failed to add labels. Please check your inputs and try again.",
     });
   }
 });
