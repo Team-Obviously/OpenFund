@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { postRequest } from '@/utility/generalServices'
 import { Card } from '@/components/ui/card'
 import { Star, GitFork, Clock, Loader2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -41,35 +40,35 @@ export function GitHubCallback() {
       setError(null)
 
       // Exchange code for access token
-      const tokenResponse = await postRequest('/github/github-callback', {
-        code,
-      })
+      // const tokenResponse = await postRequest('/github/github-callback', {
+      //   code,
+      // })
 
-      if (!tokenResponse.ok) {
-        throw new Error('Failed to exchange code for token')
-      }
+      // if (!tokenResponse.ok) {
+      //   throw new Error('Failed to exchange code for token')
+      // }
 
-      const { access_token } = await tokenResponse.json()
+      // const { access_token } = await tokenResponse.json()
 
-      // Fetch user's repositories
-      const reposResponse = await fetch('https://api.github.com/user/repos', {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
-      })
+      // // Fetch user's repositories
+      // const reposResponse = await fetch('https://api.github.com/user/repos', {
+      //   headers: {
+      //     Authorization: `Bearer ${access_token}`,
+      //     Accept: 'application/vnd.github.v3+json',
+      //   },
+      // })
 
-      if (!reposResponse.ok) {
-        throw new Error('Failed to fetch repositories')
-      }
+      // if (!reposResponse.ok) {
+      //   throw new Error('Failed to fetch repositories')
+      // }
 
-      const repositories = await reposResponse.json()
-      setRepos(repositories)
+      // const repositories = await reposResponse.json()
+      // setRepos(repositories)
     } catch (error) {
       console.error('Error handling GitHub callback:', error)
       setError('Failed to connect to GitHub')
     } finally {
-      setLoading(false)
+      navigate('/dashboard/donator')
     }
   }
 

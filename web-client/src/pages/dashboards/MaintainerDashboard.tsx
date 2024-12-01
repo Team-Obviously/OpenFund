@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { MaintainerRepositoriesResponse, Repository } from '../../types/maintainer';
+import { useState, useEffect } from 'react'
+import { MaintainerRepositoriesResponse } from '../../types/maintainer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Clock, Users, GitPullRequest, Plus, ExternalLink } from 'lucide-react'
+import { Plus, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,29 +14,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Link, useNavigate } from 'react-router-dom'
 import { postRequest } from '@/utility/generalServices'
-
-interface Project {
-  id: number
-  name: string
-  description: string
-  status: 'active' | 'completed' | 'on-hold'
-  contributorCount: number
-  pendingPRs: number
-  createdAt: string
-  lastActivity: string
-  projectUrl: string
-}
+import { DashboardNav } from '@/components/ui/dashboard-nav'
 
 export function MaintainerDashboard() {
-  const [repositories, setRepositories] = useState<MaintainerRepositoriesResponse>();
-  const [loading, setLoading] = useState(true);
+  const [repositories, setRepositories] =
+    useState<MaintainerRepositoriesResponse>()
+  const [loading, setLoading] = useState(true)
   const [showAddProject, setShowAddProject] = useState(false)
   const [newProject, setNewProject] = useState({
     name: '',
@@ -48,25 +34,16 @@ export function MaintainerDashboard() {
   useEffect(() => {
     const fetchRepositories = async () => {
       try {
-        await getAllRepositories();
-        setLoading(false);
+        await getAllRepositories()
+        setLoading(false)
       } catch (error) {
-        console.error('Error fetching repositories:', error);
-        setLoading(false);
+        console.error('Error fetching repositories:', error)
+        setLoading(false)
       }
-    };
+    }
 
-    fetchRepositories();
-  }, []);
-
-  // const totalContributors = repositories.reduce(
-  //   (sum, project) => sum + project.contributorCount,
-  //   0
-  // )
-  // const totalPendingPRs = repositories.reduce(
-  //   (sum, project) => sum + project.pendingPRs,
-  //   0
-  // )
+    fetchRepositories()
+  }, [])
 
   const handleAddProject = async () => {
     const userId = JSON.parse(localStorage.getItem('user')!)._id
@@ -77,22 +54,24 @@ export function MaintainerDashboard() {
     console.log(res)
     setShowAddProject(false)
     setNewProject({ name: '', description: '', projectUrl: '' })
-    getAllRepositories();
-  };
+    getAllRepositories()
+  }
 
-  const userDetails = JSON.parse(localStorage.getItem('user') || '{}');
+  const userDetails = JSON.parse(localStorage.getItem('user') || '{}')
 
   const getAllRepositories = async () => {
-    const response = await postRequest('/repositories/maintainer', { maintainerId: userDetails._id });
-    console.log('ALLREPOS:: ', response.data);
-    setRepositories(response.data);
+    const response = await postRequest('/repositories/maintainer', {
+      maintainerId: userDetails._id,
+    })
+    console.log('ALLREPOS:: ', response.data)
+    setRepositories(response.data)
   }
 
   return (
-    <SidebarProvider>
+    <div className="flex flex-col h-screen">
+      <DashboardNav />
       <SidebarInset>
         <header className="flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex-1 flex justify-between items-center">
             <h1 className="text-xl font-semibold">Maintainer Dashboard</h1>
@@ -164,7 +143,6 @@ export function MaintainerDashboard() {
         </header>
 
         <div className="flex flex-1 flex-col gap-6 p-4">
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">
@@ -173,32 +151,13 @@ export function MaintainerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{repositories?.data.repositories.length ?? 0}</div>
+                <div className="text-2xl font-bold">
+                  {repositories?.data.repositories.length ?? 0}
+                </div>
               </CardContent>
             </Card>
-            {/* <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Contributors
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalContributors}</div>
-              </CardContent>
-            </Card> */}
-            {/* <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Pending PRs
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{totalPendingPRs}</div>
-              </CardContent>
-            </Card> */}
           </div>
 
-          {/* Projects Grid */}
           <div className="grid grid-cols-1 gap-4">
             {repositories?.data.repositories.map((repo) => (
               <Card
@@ -221,39 +180,16 @@ export function MaintainerDashboard() {
                         </Link>
                       </h3>
                       <a
-                        // href={repo.projectUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-primary"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </a>
-                      <Badge
-                        variant={'default'}
-                      >
-                        {
-                          repo.donations?.length ? 'Funded' : 'No Donations'
-                        }
+                      <Badge variant={'default'}>
+                        {repo.donations?.length ? 'Funded' : 'No Donations'}
                       </Badge>
                     </div>
-                    {/* <p className="text-sm text-muted-foreground">
-                      {repo.description}
-                    </p> */}
-                  </div>
-                  <div className="flex items-center gap-6">
-                    {/* <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {repo.contributorCount} contributors
-                      </span>
-                    </div> */}
-                    {/* <div className="flex items-center gap-2">
-                      <GitPullRequest className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {repo.pendingPRs} pending PRs
-                      </span>
-                    </div> */}
-                    
                   </div>
                 </div>
               </Card>
@@ -261,6 +197,6 @@ export function MaintainerDashboard() {
           </div>
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </div>
   )
 }

@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { getRequest, postRequest } from '@/utility/generalServices'
 import { useOkto } from 'okto-sdk-react'
 import { Link } from 'react-router-dom'
+import { DashboardNav } from '@/components/ui/dashboard-nav'
 
 interface Organization {
   _id: string
@@ -142,132 +143,75 @@ export function DonatorDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <BackButton />
-        <h1 className="text-2xl font-bold">Donator Dashboard</h1>
-      </div>
+    <div className="flex flex-col h-screen">
+      <DashboardNav />
+      <div className="p-6 space-y-6 flex-1">
+        <div className="flex items-center gap-4">
+          <BackButton />
+          <h1 className="text-2xl font-bold">Donator Dashboard</h1>
+        </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          {/* <TabsTrigger value="organizations">Organizations</TabsTrigger> */}
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="my-donations">My Donations</TabsTrigger>
-        </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            {/* <TabsTrigger value="organizations">Organizations</TabsTrigger> */}
+            <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="my-donations">My Donations</TabsTrigger>
+          </TabsList>
 
-        {/* <TabsContent value="organizations" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {organizations.map((org) => (
-              <Card key={org._id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{org.name}</span>
-                    <Badge variant="secondary">
-                      {org.totalProjects} Projects
-                    </Badge>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {org.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <a
-                    href={org.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-500 hover:underline"
-                  >
-                    View on GitHub
-                  </a>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent> */}
-
-        <TabsContent value="projects" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {projects.map((project) => (
-              <Card key={project._id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <Link
-                      to={project.url}
-                      className="hover:underline"
+          {/* <TabsContent value="organizations" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {organizations.map((org) => (
+                <Card key={org._id}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <span>{org.name}</span>
+                      <Badge variant="secondary">
+                        {org.totalProjects} Projects
+                      </Badge>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      {org.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <a
+                      href={org.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="text-sm text-blue-500 hover:underline"
                     >
-                      <CardTitle>{project.name}</CardTitle>
-                    </Link>
-                    <Badge
-                      variant={
-                        project.status === 'active' ? 'default' : 'secondary'
-                      }
-                    >
-                      {project.status}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {project.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span>Organization:</span>
-                      <span className="font-medium">
-                        {project.organizationName}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Total Donations:</span>
-                      <span className="font-medium">
-                        {project.totalDonations}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Total Funding:</span>
-                      <span className="font-medium">
-                        ${project.totalAmount}
-                      </span>
-                    </div>
-                    <Button
-                      className="w-full"
-                      onClick={() => handleDonate(project)}
-                    >
-                      Donate Now
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+                      View on GitHub
+                    </a>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent> */}
 
-        <TabsContent value="my-donations" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {donations.map((donation) => {
-              const myDonation = donation.donations.find(
-                (d) =>
-                  d.userId ===
-                  JSON.parse(localStorage.getItem('user') || '{}')._id
-              )
-
-              return (
-                <Card key={donation._id}>
+          <TabsContent value="projects" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {projects.map((project) => (
+                <Card key={project._id}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <Link
-                        to={donation.url}
+                        to={project.url}
                         className="hover:underline"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <CardTitle>{donation.name}</CardTitle>
+                        <CardTitle>{project.name}</CardTitle>
                       </Link>
+                      <Badge
+                        variant={
+                          project.status === 'active' ? 'default' : 'secondary'
+                        }
+                      >
+                        {project.status}
+                      </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {donation.description}
+                      {project.description}
                     </p>
                   </CardHeader>
                   <CardContent>
@@ -275,66 +219,126 @@ export function DonatorDashboard() {
                       <div className="flex justify-between text-sm">
                         <span>Organization:</span>
                         <span className="font-medium">
-                          {donation.organizationName}
+                          {project.organizationName}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>My Donation:</span>
+                        <span>Total Donations:</span>
                         <span className="font-medium">
-                          ${myDonation?.amount || 0}
+                          {project.totalDonations}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Total Project Funding:</span>
+                        <span>Total Funding:</span>
                         <span className="font-medium">
-                          ${donation.totalAmount}
+                          ${project.totalAmount}
                         </span>
                       </div>
+                      <Button
+                        className="w-full"
+                        onClick={() => handleDonate(project)}
+                      >
+                        Donate Now
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-              )
-            })}
-            {donations.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                You haven't made any donations yet.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Amount (USD)</label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                value={donationAmount}
-                onChange={(e) => setDonationAmount(e.target.value)}
-                placeholder="Enter donation amount"
-              />
+              ))}
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDonationSubmit}
-              disabled={!donationAmount || parseFloat(donationAmount) <= 0}
-            >
-              Confirm Donation
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </TabsContent>
+
+          <TabsContent value="my-donations" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {donations.map((donation) => {
+                const myDonation = donation.donations.find(
+                  (d) =>
+                    d.userId ===
+                    JSON.parse(localStorage.getItem('user') || '{}')._id
+                )
+
+                return (
+                  <Card key={donation._id}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <Link
+                          to={donation.url}
+                          className="hover:underline"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <CardTitle>{donation.name}</CardTitle>
+                        </Link>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {donation.description}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between text-sm">
+                          <span>Organization:</span>
+                          <span className="font-medium">
+                            {donation.organizationName}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>My Donation:</span>
+                          <span className="font-medium">
+                            ${myDonation?.amount || 0}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Total Project Funding:</span>
+                          <span className="font-medium">
+                            ${donation.totalAmount}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+              {donations.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  You haven't made any donations yet.
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Amount (USD)</label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={donationAmount}
+                  onChange={(e) => setDonationAmount(e.target.value)}
+                  placeholder="Enter donation amount"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDonationSubmit}
+                disabled={!donationAmount || parseFloat(donationAmount) <= 0}
+              >
+                Confirm Donation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   )
 }

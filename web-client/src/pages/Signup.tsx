@@ -29,8 +29,8 @@ interface AuthResponse {
   auth_token: string
 }
 
-// const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
-// const REDIRECT_URI = `${window.location.origin}/github-auth`
+const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
+const REDIRECT_URI = `${window.location.origin}/github-auth`
 
 const LoginPage: React.FC<LoginPageProps> = ({
   setAuthToken,
@@ -53,7 +53,6 @@ const LoginPage: React.FC<LoginPageProps> = ({
 
     const idToken = credentialResponse.credential
 
-    // First authenticate with Okto
     authenticate(
       idToken,
       async (authResponse: AuthResponse | null, error: Error | null) => {
@@ -71,22 +70,23 @@ const LoginPage: React.FC<LoginPageProps> = ({
     )
   }
 
-  // const handleGithubAuth = () => {
-  //   const scope = 'read:user user:email'
-  //   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}`
-  //   window.location.href = githubAuthUrl
-  // }
+  const handleGithubAuth = () => {
+    const scope = 'read:user user:email'
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}`
+    window.location.href = githubAuthUrl
+  }
 
   const handleSubmitUserDetails = async () => {
     if (!oktoAuthResponse) return
 
     try {
       // Create account in backend
+      await handleGithubAuth()
       const response = await postRequest('/auth/signup', {
         oktoAuthResponse,
         userDetails: {
           name,
-          githubUsername: 'virajbhartiya',
+          githubUsername: import.meta.env.VITE_GITHUB_USERNAME,
         },
       })
       console.log(response)
@@ -198,5 +198,4 @@ const LoginPage: React.FC<LoginPageProps> = ({
     </div>
   )
 }
-
 export default LoginPage

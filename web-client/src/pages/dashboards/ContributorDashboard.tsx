@@ -1,193 +1,115 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { GitPullRequest, CircleDot } from 'lucide-react'
 import { BackButton } from '@/components/ui/back-button'
+import { getRequest } from '@/utility/generalServices'
+import { Link } from 'react-router-dom'
+import { DashboardNav } from '@/components/ui/dashboard-nav'
 
 interface Repository {
-  id: number
+  _id: string
   name: string
   description: string
-  stars: number
+  maintainer: string
+  organizationName: string
+  url: string
+  totalDonations: number
+  totalAmount: number
+  status: 'active' | 'completed'
 }
-
-interface Contribution {
-  id: number
-  title: string
-  type: 'issue' | 'pr'
-  status: 'open' | 'closed' | 'merged'
-  repoName: string
-  createdAt: string
-}
-
-const MOCK_CONTRIBUTED_REPOS: Repository[] = [
-  {
-    id: 1,
-    name: 'OSS Fund Backend',
-    description: 'Backend for the OSS Fund platform',
-    stars: 45,
-  },
-  {
-    id: 2,
-    name: 'Community Docs',
-    description: 'Documentation portal for the community',
-    stars: 23,
-  },
-]
-
-const MOCK_AVAILABLE_REPOS: Repository[] = [
-  {
-    id: 3,
-    name: 'Design System',
-    description: 'Shared component library',
-    stars: 89,
-  },
-  {
-    id: 4,
-    name: 'Analytics Dashboard',
-    description: 'Real-time analytics platform',
-    stars: 34,
-  },
-]
-
-const MOCK_CONTRIBUTIONS: Contribution[] = [
-  {
-    id: 1,
-    title: 'Fix Authentication System',
-    type: 'pr',
-    status: 'merged',
-    repoName: 'OSS Fund Backend',
-    createdAt: '2024-03-19',
-  },
-  {
-    id: 2,
-    title: 'Add API Documentation',
-    type: 'issue',
-    status: 'closed',
-    repoName: 'Community Docs',
-    createdAt: '2024-03-18',
-  },
-]
 
 export function ContributorDashboard() {
-  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
-  const [activeTab, setActiveTab] = useState('contributed')
+  const [repositories, setRepositories] = useState<Repository[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const getContributionsForRepo = (repoName: string) => {
-    return MOCK_CONTRIBUTIONS.filter((c) => c.repoName === repoName)
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await getRequest('/repositories/all')
+        setRepositories(
+          Array.isArray(response.data.data.repositories)
+            ? response.data.data.repositories
+            : []
+        )
+        setError(null)
+      } catch (err) {
+        setError('Failed to fetch repositories. Please try again later.')
+        console.error('Error fetching data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return <div className="p-6">Loading...</div>
+  }
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <BackButton />
-        <h1 className="text-2xl font-bold">Contributor Dashboard</h1>
-      </div>
+    <div className="flex flex-col h-screen">
+      <DashboardNav />
+      <div className="p-6 space-y-6 flex-1">
+        <div className="flex items-center gap-4">
+          <BackButton />
+          <h1 className="text-2xl font-bold">Available Repositories</h1>
+        </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="contributed">My Contributions</TabsTrigger>
-          <TabsTrigger value="available">Available Repositories</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="contributed" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MOCK_CONTRIBUTED_REPOS.map((repo) => (
-              <Card
-                key={repo.id}
-                className="cursor-pointer hover:border-primary"
-                onClick={() => setSelectedRepo(repo)}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{repo.name}</span>
-                    <Badge variant="secondary">{repo.stars} ★</Badge>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {repo.description}
-                  </p>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="available" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MOCK_AVAILABLE_REPOS.map((repo) => (
-              <Card
-                key={repo.id}
-                className="cursor-pointer hover:border-primary"
-                onClick={() => setSelectedRepo(repo)}
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{repo.name}</span>
-                    <Badge variant="secondary">{repo.stars} ★</Badge>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {repo.description}
-                  </p>
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {selectedRepo && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Contributions to {selectedRepo.name}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {getContributionsForRepo(selectedRepo.name).map(
-                (contribution) => (
-                  <div
-                    key={contribution.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {repositories.map((repo) => (
+            <Card key={repo._id}>
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <Link
+                    to={repo.url}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <div className="flex items-center gap-3">
-                      {contribution.type === 'pr' ? (
-                        <GitPullRequest className="h-5 w-5 text-purple-500" />
-                      ) : (
-                        <CircleDot className="h-5 w-5 text-green-500" />
-                      )}
-                      <div>
-                        <h3 className="font-medium">{contribution.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Created on{' '}
-                          {new Date(
-                            contribution.createdAt
-                          ).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <Badge
-                      variant={
-                        contribution.status === 'merged'
-                          ? 'secondary'
-                          : contribution.status === 'closed'
-                          ? 'outline'
-                          : 'default'
-                      }
-                    >
-                      {contribution.status}
-                    </Badge>
-                  </div>
-                )
-              )}
-              {getContributionsForRepo(selectedRepo.name).length === 0 && (
-                <p className="text-center text-muted-foreground">
-                  No contributions yet to this repository
+                    <CardTitle>{repo.name}</CardTitle>
+                  </Link>
+                  <Badge
+                    variant={repo.status === 'active' ? 'default' : 'secondary'}
+                  >
+                    {repo.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {repo.description}
                 </p>
-              )}
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span>Organization:</span>
+                    <span className="font-medium">{repo.organizationName}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Total Donations:</span>
+                    <span className="font-medium">{repo.totalDonations}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Total Funding:</span>
+                    <span className="font-medium">${repo.totalAmount}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {repositories.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground col-span-2">
+              No repositories available.
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </div>
+      </div>
     </div>
   )
 }
