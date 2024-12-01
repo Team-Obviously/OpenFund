@@ -5,6 +5,7 @@ import type { StakeComment } from "../baml_client/types";
 import { Issue } from "../models/issue.model";
 import Repository from "../models/repository.model";
 import { assignStakeToIssue, donateToRepository } from "../blockchain/blockchainTransactions";
+import axios from "axios";
 
 export const newComment = catchAsync(async (req: Request, res: Response) => {
   try {
@@ -60,6 +61,20 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
       throw new Error("Repository not found");
     }
 
+    await axios.post("http://localhost:3002/add-labels", {
+      owner: owner,
+      repo: repository,
+      issue_number: response.issue_number,
+      labels: ["Funded"],
+    });
+
+    await axios.post("http://localhost:3002/add-comment", {
+      owner: owner,
+      repo: repository,
+      issue_number: response.issue_number,
+      comment: "Now this issue has been funded by " + response.amount + "matic. Solve it to earn the stake!",
+    });
+
     return res.status(200).json({
       success: true,
       message: "Issue created successfully",
@@ -92,7 +107,7 @@ export const closeIssue = catchAsync(async (req: Request, res: Response) => {
   }
 
   currentIssue.status = "closed";
-  currentIssue.assignee = contributors;
+  currentIssue.assignee = contributors[0];
   await currentIssue.save();
 
   res.status(200).json({
