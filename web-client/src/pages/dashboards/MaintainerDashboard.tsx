@@ -14,7 +14,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarInset } from '@/components/ui/sidebar'
 import { Link, useNavigate } from 'react-router-dom'
 import { postRequest } from '@/utility/generalServices'
 import { DashboardNav } from '@/components/ui/dashboard-nav'
