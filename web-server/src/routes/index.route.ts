@@ -5,6 +5,7 @@ import githubRouter from "./github.route";
 import botRouter from "./bot.route";
 import issuesRouter from "./issues.route";
 import repositoriesRouter from "./repositories.route";
+import organisationsRouter from "./organisations.route";
 
 export const routes = (app: Application) => {
   app.use("/api/users", userRouter);
@@ -13,4 +14,5 @@ export const routes = (app: Application) => {
   app.use("/api/bot", botRouter);
   app.use("/api/issues", issuesRouter);
   app.use("/api/repositories", repositoriesRouter);
+  app.use("/api/organisations", organisationsRouter);
 };
