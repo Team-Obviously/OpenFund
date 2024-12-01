@@ -17,13 +17,17 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
       owner,
       issueTitle,
     } = req.body;
-    
-    const response = await b.ExtractStakeComment(commentBody);  
+
+    const response = await b.ExtractStakeComment(commentBody);
     console.log(response);
 
-    const balance = await assignStakeToIssue(repository, String(response.issue_number), String(response.amount));
+    const balance = await assignStakeToIssue(
+      repository,
+      String(response.issue_number),
+      String(response.amount)
+    );
     console.log(balance, issueTitle);
-    
+
     const newIssue = new Issue({
       issueNumber: response.issue_number,
       title: issueTitle,
@@ -78,6 +82,18 @@ export const closeIssue = catchAsync(async (req: Request, res: Response) => {
   const { issue, contributors, linkedPRs } = req.body;
   console.log(req.body.issue.number);
   console.log(req.body.issue.title);
+
+  const currentIssue = await Issue.findOne({
+    issueNumber: issue.number,
+  });
+
+  if (!currentIssue) {
+    throw new Error("Issue not found");
+  }
+
+  currentIssue.status = "closed";
+  currentIssue.assignee = contributors;
+  await currentIssue.save();
 
   res.status(200).json({
     status: "success",
