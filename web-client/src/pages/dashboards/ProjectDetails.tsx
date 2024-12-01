@@ -12,6 +12,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useParams } from 'react-router-dom'
 import { postRequest } from '@/utility/generalServices'
+import { Repository } from '@/types/maintainer'
+import { MaintainerRepositoriesResponse, MaintainerRepositoryDetailsResponse } from '@/types/maintainer'
 
 interface Contributor {
   id: number
@@ -82,16 +84,33 @@ const MOCK_ISSUES: Issue[] = [
 
 export function ProjectDetails() {
   const { projectId } = useParams();
-  console.log('PROJECTID:: ', projectId);
   const [activeTab, setActiveTab] = useState('issues')
+  const [repositoryDetails, setRepositoryDetails] = useState<Repository>();
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=> {
+  useEffect(() => {
     getRepositoryDetails();
-  }, []);
+  }, [projectId]);
 
   const getRepositoryDetails = async () => {
-    const response = await postRequest('/repositories/with-issues', { repositoryId: projectId });
-    console.log('RESPONSE:: ', response.data);
+    try {
+      setLoading(true);
+      const response = await postRequest('/repositories/with-issues', { repositoryId: projectId });
+      console.log('RESPONSE:: ', response.data.data.repository);
+      setRepositoryDetails(response.data.data.repository);
+    } catch (error) {
+      console.error('Error fetching repository details:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  if (!repositoryDetails) {
+    return <div className="flex items-center justify-center h-screen">Repository not found</div>;
   }
 
   return (
@@ -101,9 +120,9 @@ export function ProjectDetails() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex-1 flex justify-between items-center">
-            <h1 className="text-xl font-semibold">OSS Fund Backend</h1>
+            <h1 className="text-xl font-semibold">{repositoryDetails.name}</h1>
             <Badge variant="outline" className="text-sm">
-              {MOCK_CONTRIBUTORS.length} contributors
+              {/* {repositoryDetails.?.length || 0} contributors */}
             </Badge>
           </div>
         </header>
@@ -119,7 +138,7 @@ export function ProjectDetails() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {MOCK_ISSUES.filter((i) => i.status === 'open').length}
+                  {repositoryDetails.issues?.filter(i => i.status === 'open').length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -131,7 +150,7 @@ export function ProjectDetails() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {MOCK_ISSUES.filter((i) => i.status === 'in-progress').length}
+                  {repositoryDetails.issues?.filter(i => i.status === 'in-progress').length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -143,22 +162,22 @@ export function ProjectDetails() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {MOCK_CONTRIBUTORS.length}
+                  {repositoryDetails.donators?.length || 0}
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Contributions
+                  Total Contributions (in Matic)
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {MOCK_CONTRIBUTORS.reduce(
-                    (sum, contributor) => sum + contributor.contributions,
+                  {repositoryDetails.donations?.reduce(
+                    (sum, donation) => sum + donation.amount,
                     0
-                  )}
+                  ) || 0} 
                 </div>
               </CardContent>
             </Card>
@@ -171,8 +190,8 @@ export function ProjectDetails() {
             </TabsList>
 
             <TabsContent value="issues" className="space-y-4">
-              {MOCK_ISSUES.map((issue) => (
-                <Card key={issue.id}>
+              {repositoryDetails.issues?.map((issue) => (
+                <Card key={issue.issueUrl}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
@@ -180,29 +199,25 @@ export function ProjectDetails() {
                           <h3 className="font-semibold">{issue.title}</h3>
                           <Badge
                             variant={
-                              issue.priority === 'high'
-                                ? 'destructive'
-                                : issue.priority === 'medium'
-                                ? 'secondary'
-                                : 'outline'
+                              'default'
                             }
                           >
-                            {issue.priority}
+                            {issue.amount}
                           </Badge>
                           <Badge
                             variant={
                               issue.status === 'open'
                                 ? 'default'
                                 : issue.status === 'in-progress'
-                                ? 'secondary'
-                                : 'outline'
+                                  ? 'secondary'
+                                  : 'outline'
                             }
                           >
                             {issue.status}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {issue.description}
+                          {issue.assignee}
                         </p>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -214,7 +229,7 @@ export function ProjectDetails() {
                         )}
                         <span className="flex items-center gap-1">
                           <MessageSquare className="h-4 w-4" />
-                          {issue.commentsCount}
+                          {/* {issue} */}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
@@ -228,25 +243,25 @@ export function ProjectDetails() {
             </TabsContent>
 
             <TabsContent value="contributors" className="space-y-4">
-              {MOCK_CONTRIBUTORS.map((contributor) => (
-                <Card key={contributor.id}>
+              {repositoryDetails.donators?.map((donator) => (
+                <Card key={donator._id}>
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <img
-                          src={contributor.avatarUrl}
-                          alt={contributor.username}
+                          src={donator.name}
+                          alt={donator.name}
                           className="h-10 w-10 rounded-full"
                         />
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">
-                              {contributor.username}
+                              {donator.name}
                             </h3>
-                            <Badge variant="outline">{contributor.role}</Badge>
+                            <Badge variant="outline">Donator</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            {contributor.contributions} contributions
+                            {/* {donator.} contributions */}
                           </p>
                         </div>
                       </div>
@@ -254,7 +269,7 @@ export function ProjectDetails() {
                         <Clock className="h-4 w-4" />
                         Last active:{' '}
                         {new Date(
-                          contributor.lastContribution
+                          donator.createdAt
                         ).toLocaleDateString()}
                       </div>
                     </div>
