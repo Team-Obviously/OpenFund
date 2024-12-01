@@ -1,391 +1,324 @@
 import { useEffect, useState } from 'react'
-import { Separator } from '@/components/ui/separator'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar'
-import { ExternalLink, Users, Calendar, DollarSign, Plus } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { Project } from '@/types/repository'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { BackButton } from '@/components/ui/back-button'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { getRequest } from '@/utility/generalServices'
 
-type Donation = {
-  id: string
-  projectId: string
-  projectName: string
-  amount: number
-  date: string
-  status: 'completed' | 'pending' | 'failed'
-  transactionHash?: string
+import { Button } from '@/components/ui/button'
+import { getRequest, postRequest } from '@/utility/generalServices'
+import { useOkto } from 'okto-sdk-react'
+import { encodeDonateToRepository } from '@/utility/abiEncoder'
+
+interface Organization {
+  _id: string
+  name: string
+  description: string
+  totalProjects: number
+  githubUrl: string
 }
 
-type Organization = {
-  id: string
+interface Project {
+  _id: string
   name: string
-  projects: Project[]
+  description: string
+  organizationName: string
+  fundingGoal: number
+  currentFunding: number
+  status: 'active' | 'completed'
 }
 
 export function DonatorDashboard() {
-  const [selectedOrg, setSelectedOrg] = useState<string>('')
-  const [selectedProject, setSelectedProject] = useState<string>('')
-  const [amount, setAmount] = useState<string>('')
-  const [showThankYou, setShowThankYou] = useState(false)
-  const [donationDialog, setDonationDialog] = useState(false);
-  const [organisations, setOrganisations] = useState<any>();
+  const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [donations, setDonations] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('organizations')
 
-  useEffect(()=> {
-    getAllOrganisations();  
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [donationAmount, setDonationAmount] = useState('')
+  const { executeRawTransaction } = useOkto()!
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const [orgsResponse, projectsResponse, donationsResponse] =
+          await Promise.all([
+            getRequest('/organisations/all'),
+            getRequest('/repositories/all'),
+            getRequest('/repositories/my'),
+          ])
+        console.log(orgsResponse, projectsResponse, donationsResponse)
+        setOrganizations(
+          Array.isArray(orgsResponse.data.data.organisations)
+            ? orgsResponse.data.data.organisations
+            : []
+        )
+        setProjects(
+          Array.isArray(projectsResponse.data.data.repositories)
+            ? projectsResponse.data.data.repositories
+            : []
+        )
+        setDonations(
+          Array.isArray(donationsResponse.data.data.repositories)
+            ? donationsResponse.data.data.repositories
+            : []
+        )
+        setError(null)
+      } catch (err) {
+        setError('Failed to fetch data. Please try again later.')
+        console.error('Error fetching data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [])
 
-
-  const getAllOrganisations = async () => {
-    const response = await getRequest('/organisations/all');
-    console.log('ALLORGS:: ', response.data);
-    setOrganisations(response.data);
-  };
-
-  const getAllDonatedRepositories = async () => {
-    const response = await getRequest('/repositories/my');
+  const handleDonate = (project: Project) => {
+    setSelectedProject(project)
+    setIsDialogOpen(true)
+    setDonationAmount('')
   }
 
-  // Mock organizations data
-  const organizations: Organization[] = [
-    {
-      id: '1',
-      name: 'OpenAI',
-      projects: [
-        {
-          id: '1',
-          name: 'GPT-4',
-          githubUrl: 'https://github.com/openai/gpt-4',
-          contributorsCount: 150,
-          fundedAmount: 100000,
+  const handleDonationSubmit = async () => {
+    try {
+      const encodedData = encodeDonateToRepository(
+        selectedProject?.name || '',
+        donationAmount
+      )
+      console.log(encodedData)
+      const res = await executeRawTransaction({
+        network_name: 'POLYGON_TESTNET_AMOY',
+        transaction: {
+          to: encodedData.to,
+          data: encodedData.data,
+          value: encodedData.value,
+          from: '0x28bAF7e11B58cac537559380e388C46168220a7d',
         },
-        {
-          id: '2',
-          name: 'DALL-E',
-          githubUrl: 'https://github.com/openai/dall-e',
-          contributorsCount: 75,
-          fundedAmount: 50000,
-        },
-      ],
-    },
-    {
-      id: '2',
-      name: 'Meta',
-      projects: [
-        {
-          id: '3',
-          name: 'React',
-          githubUrl: 'https://github.com/facebook/react',
-          contributorsCount: 1500,
-          fundedAmount: 200000,
-        },
-      ],
-    },
-  ]
-
-  // Mock donations data
-  const donations: Donation[] = [
-    {
-      id: '1',
-      projectId: '1',
-      projectName: 'GPT-4',
-      amount: 1500,
-      date: '2024-03-15',
-      status: 'completed',
-      transactionHash: '0x123...abc',
-    },
-    {
-      id: '2',
-      projectId: '3',
-      projectName: 'React',
-      amount: 2000,
-      date: '2024-03-10',
-      status: 'completed',
-      transactionHash: '0x456...def',
-    },
-  ]
-
-  const totalDonated = donations.reduce(
-    (sum, donation) => sum + donation.amount,
-    0
-  )
-  const projects = organizations.flatMap((org) => org.projects)
-
-  const handleDonation = () => {
-    console.log('Donation:', {
-      organizationId: selectedOrg,
-      projectId: selectedProject,
-      amount: Number(amount),
-    })
-    setDonationDialog(false) // Close donation dialog
-    setShowThankYou(true) // Show thank you dialog
-    setSelectedOrg('')
-    setSelectedProject('')
-    setAmount('')
+      })
+      console.log(res)
+      // setIsDialogOpen(false)
+      const userData = JSON.parse(localStorage.getItem('user') || '{}')
+      const re = await postRequest('/repositories/donate', {
+        amount: donationAmount,
+        repositoryId: selectedProject?._id,
+        userId: userData._id,
+      })
+      console.log(re)
+      // setIsDialogOpen(false)
+    } catch (error) {
+      console.error('Donation failed:', error)
+    }
   }
 
-  const selectedOrgProjects = organizations.find(
-    (org) => org.id === selectedOrg
-  )?.projects
+  if (loading) {
+    return <div className="p-6">Loading...</div>
+  }
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>
+  }
 
   return (
-    <SidebarProvider>
-      <SidebarInset>
-        <header className="flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <div className="flex-1 flex justify-between items-center">
-            <h1 className="text-xl font-semibold">Dashboard</h1>
-            <Dialog open={donationDialog} onOpenChange={setDonationDialog}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Make Donation
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Make a Donation</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <label htmlFor="organization">Organization</label>
-                    <Select
-                      value={selectedOrg}
-                      onValueChange={(value) => {
-                        setSelectedOrg(value)
-                        setSelectedProject('') // Reset project when org changes
-                      }}
+    <div className="p-6 space-y-6">
+      <div className="flex items-center gap-4">
+        <BackButton />
+        <h1 className="text-2xl font-bold">Donator Dashboard</h1>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="organizations">Organizations</TabsTrigger>
+          <TabsTrigger value="projects">Projects</TabsTrigger>
+          <TabsTrigger value="my-donations">My Donations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="organizations" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {organizations.map((org) => (
+              <Card key={org._id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{org.name}</span>
+                    <Badge variant="secondary">
+                      {org.totalProjects} Projects
+                    </Badge>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {org.description}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <a
+                    href={org.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-500 hover:underline"
+                  >
+                    View on GitHub
+                  </a>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="projects" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {projects.map((project) => (
+              <Card key={project._id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{project.name}</span>
+                    <Badge
+                      variant={
+                        project.status === 'active' ? 'default' : 'secondary'
+                      }
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select organization" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {organizations.map((org) => (
-                          <SelectItem key={org.id} value={org.id}>
-                            {org.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {selectedOrg && (
-                    <div className="grid gap-2">
-                      <label htmlFor="project">Project</label>
-                      <Select
-                        value={selectedProject}
-                        onValueChange={setSelectedProject}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select project" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedOrgProjects?.map((project) => (
-                            <SelectItem key={project.id} value={project.id}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>{project.name}</span>
-                                <span className="text-muted-foreground text-sm">
-                                  ${project.fundedAmount.toLocaleString()}{' '}
-                                  funded
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {project.status}
+                    </Badge>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {project.description}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Organization:</span>
+                      <span className="font-medium">
+                        {project.organizationName}
+                      </span>
                     </div>
-                  )}
-
-                  <div className="grid gap-2">
-                    <label htmlFor="amount">Amount (USD)</label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      placeholder="Enter amount"
-                      min="0"
-                    />
+                    <div className="flex justify-between text-sm">
+                      <span>Funding Progress:</span>
+                      <span className="font-medium">
+                        ${project.currentFunding} / ${project.fundingGoal}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full"
+                        style={{
+                          width: `${
+                            (project.currentFunding / project.fundingGoal) * 100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={() => handleDonate(project)}
+                    >
+                      Donate Now
+                    </Button>
                   </div>
-
-                  <Button
-                    onClick={handleDonation}
-                    disabled={!selectedOrg || !selectedProject || !amount}
-                  >
-                    Submit Donation
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </header>
+        </TabsContent>
 
-        {/* Thank You Dialog */}
-        <Dialog open={showThankYou} onOpenChange={setShowThankYou}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Thank You for Your Donation!</DialogTitle>
-              <DialogDescription>
-                Your contribution helps support open source development and
-                makes a real difference.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button onClick={() => setShowThankYou(false)}>Close</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <div className="flex flex-1 flex-col gap-6 p-4">
-          {/* Donation Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Donated
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${totalDonated.toLocaleString()}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Projects Supported
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{projects.length}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Transactions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{donations.length}</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Projects Section */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Supported Projects</h2>
-            <div className="flex flex-col gap-4">
-              {projects.map((project) => (
-                <Link to={`/repositories/${project.id}`}>
-                  <div
-                    key={project.id}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <h2 className="font-semibold">{project.name}</h2>
-                        <a
-                          href={project.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-primary"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span>{project.contributorsCount} contributors</span>
-                      </div>
+        <TabsContent value="my-donations" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {donations.map((donation) => (
+              <Card key={donation._id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{donation.name}</span>
+                    <Badge
+                      variant={
+                        donation.status === 'active' ? 'default' : 'secondary'
+                      }
+                    >
+                      {donation.status}
+                    </Badge>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {donation.description}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Organization:</span>
+                      <span className="font-medium">
+                        {donation.organizationName}
+                      </span>
                     </div>
-                    <div className="flex items-center">
-                      <div className="text-right">
-                        <div className="font-medium">
-                          ${project.fundedAmount.toLocaleString()}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Total Funded
-                        </div>
-                      </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Funding Progress:</span>
+                      <span className="font-medium">
+                        ${donation.currentFunding} / ${donation.fundingGoal}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full"
+                        style={{
+                          width: `${
+                            (donation.currentFunding / donation.fundingGoal) *
+                            100
+                          }%`,
+                        }}
+                      />
                     </div>
                   </div>
-                </Link>
-              ))}
+                </CardContent>
+              </Card>
+            ))}
+            {donations.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                You haven't made any donations yet.
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Donate to {selectedProject?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Amount (USD)</label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={donationAmount}
+                onChange={(e) => setDonationAmount(e.target.value)}
+                placeholder="Enter donation amount"
+              />
             </div>
           </div>
-
-          {/* My Donations Section */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">My Donations</h2>
-            <div className="flex flex-col gap-3">
-              {donations.map((donation) => (
-                <div
-                  key={donation.id}
-                  className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <DollarSign className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{donation.projectName}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-2">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(donation.date).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <div className="font-medium">
-                        ${donation.amount.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {donation.status}
-                      </div>
-                    </div>
-                    {donation.transactionHash && (
-                      <a
-                        href={`https://etherscan.io/tx/${donation.transactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDonationSubmit}
+              disabled={!donationAmount || parseFloat(donationAmount) <= 0}
+            >
+              Confirm Donation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }

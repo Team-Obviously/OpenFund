@@ -9,16 +9,7 @@ import { Issue } from "../models/issue.model";
 
 export const getAllRepositories = catchAsync(
   async (req: Request, res: Response) => {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(401).json({
-        status: "error",
-        message: "User not authenticated",
-      });
-    }
-
-    const repositories = await Repository.find().sort({ updatedAt: -1 });
+    const repositories = await Repository.find();
 
     res.status(200).json({
       status: "success",
@@ -63,8 +54,8 @@ export const getContributorsForRepository = catchAsync(
 
 export const donateToRepository = catchAsync(
   async (req: Request, res: Response) => {
+    console.log(req.body);
     const { repositoryId, userId, amount } = req.body;
-
     const repository = await Repository.findById(repositoryId);
 
     if (!repository) {

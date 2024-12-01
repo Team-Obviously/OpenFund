@@ -5,13 +5,12 @@ import {
   getMyDonatedRepositories,
   getRepositoryByOrganisation,
   createRepository,
+  getAllRepositories,
 } from "../controller/repositories.controller";
-import { getAll } from "../controller/utils/handlerFactory";
-import Repository from "../models/repository.model";
 
 const router = Router();
 
-router.get("/all", getAll(Repository));
+router.get("/all", getAllRepositories);
 router.get("/my", getMyDonatedRepositories);
 router.get("/contributors", getContributorsForRepository);
 router.get("/organisation", getRepositoryByOrganisation);
