@@ -5,6 +5,7 @@ import User from "../models/user.model";
 import dotenv from "dotenv";
 import { Document } from "mongoose";
 import Donation from "../models/donations.model";
+import Organisation from "../models/organisation.model";
 
 dotenv.config();
 
@@ -65,6 +66,14 @@ interface RepositoryDocument extends Document {
   _id: mongoose.Types.ObjectId;
 }
 
+interface DummyOrganisation {
+  name: string;
+  description: string;
+  url: string;
+  repositories: mongoose.Types.ObjectId[];
+  owner: mongoose.Types.ObjectId;
+}
+
 const dummyUsers: DummyUser[] = [
   {
     name: "User One",
@@ -119,6 +128,23 @@ const dummyIssues: DummyIssue[] = [
 
 let dummyDonations: DummyDonation[];
 
+const dummyOrganisations: DummyOrganisation[] = [
+  {
+    name: "Awesome Organization",
+    description: "Organization for awesome open source projects",
+    url: "https://github.com/awesome-org",
+    repositories: [] as mongoose.Types.ObjectId[], // Will be filled after repository creation
+    owner: "" as unknown as mongoose.Types.ObjectId, // Will be filled with user ID
+  },
+  {
+    name: "Cool Projects",
+    description: "Organization for cool libraries and tools",
+    url: "https://github.com/cool-projects",
+    repositories: [] as mongoose.Types.ObjectId[],
+    owner: "" as unknown as mongoose.Types.ObjectId,
+  },
+];
+
 async function seedData() {
   try {
     // Connect to MongoDB
@@ -130,6 +156,7 @@ async function seedData() {
     await Issue.deleteMany({});
     await User.deleteMany({});
     await Donation.deleteMany({});
+    await Organisation.deleteMany({});
     console.log("Cleared existing data");
 
     // Insert users first
@@ -171,6 +198,16 @@ async function seedData() {
       dummyRepositories
     )) as RepositoryDocument[];
     console.log("Inserted repositories");
+
+    // Create and insert organizations
+    const organisationsWithRefs = dummyOrganisations.map((org, index) => ({
+      ...org,
+      owner: users[index]._id,
+      repositories: [repositories[index]._id],
+    }));
+
+    await Organisation.insertMany(organisationsWithRefs);
+    console.log("Inserted organizations");
 
     // Create donations after repositories are created
     dummyDonations = [
