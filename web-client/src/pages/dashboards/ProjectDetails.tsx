@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 // import { useParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,8 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useParams } from 'react-router-dom'
+import { postRequest } from '@/utility/generalServices'
 
 interface Contributor {
   id: number
@@ -79,8 +81,18 @@ const MOCK_ISSUES: Issue[] = [
 ]
 
 export function ProjectDetails() {
-  // const { projectId } = useParams()
+  const { projectId } = useParams();
+  console.log('PROJECTID:: ', projectId);
   const [activeTab, setActiveTab] = useState('issues')
+
+  useEffect(()=> {
+    getRepositoryDetails();
+  }, []);
+
+  const getRepositoryDetails = async () => {
+    const response = await postRequest('/repositories/with-issues', { repositoryId: projectId });
+    console.log('RESPONSE:: ', response.data);
+  }
 
   return (
     <SidebarProvider>
