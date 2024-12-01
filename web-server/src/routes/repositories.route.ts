@@ -4,6 +4,7 @@ import {
   getContributorsForRepository,
   getMyDonatedRepositories,
   getRepositoryByOrganisation,
+  createRepository,
 } from "../controller/repositories.controller";
 import { getAll } from "../controller/utils/handlerFactory";
 import Repository from "../models/repository.model";
@@ -15,6 +16,7 @@ router.get("/my", getMyDonatedRepositories);
 router.get("/contributors", getContributorsForRepository);
 router.get("/organisation", getRepositoryByOrganisation);
 router.post("/donate", donateToRepository);
+router.post("/create", createRepository);
 
 // router.get("/:repositoryId", getRepository);
 // router.post("/", createRepository);

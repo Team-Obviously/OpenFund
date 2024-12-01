@@ -11,7 +11,6 @@ export interface IRepository extends Document {
   createdAt: Date;
   updatedAt: Date;
   maintainer: IUser;
-  organisation: IOrganisation;
   donators: IUser[];
   donations: IDonations[];
   contributors: IUser[];

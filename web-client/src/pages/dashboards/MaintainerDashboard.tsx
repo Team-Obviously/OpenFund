@@ -19,6 +19,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { Link, useNavigate } from 'react-router-dom'
+import { postRequest } from '@/utility/generalServices'
 
 interface Project {
   id: number
@@ -90,8 +91,13 @@ export function MaintainerDashboard() {
     0
   )
 
-  const handleAddProject = () => {
-    // Handle project addition logic here
+  const handleAddProject = async () => {
+    const userId = JSON.parse(localStorage.getItem('user')!)._id
+    const res = await postRequest('/repositories/create', {
+      ...newProject,
+      userId,
+    })
+    console.log(res)
     setShowAddProject(false)
     setNewProject({ name: '', description: '', projectUrl: '' })
   }

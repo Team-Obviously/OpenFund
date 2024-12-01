@@ -139,3 +139,23 @@ export const getRepositoryByOrganisation = catchAsync(
     });
   }
 );
+
+export const createRepository = catchAsync(
+  async (req: Request, res: Response) => {
+    const { name, projectUrl, userId } = req.body;
+    console.log(req.body);
+
+    const repository = await Repository.create({
+      name,
+      url: projectUrl,
+      maintainer: userId,
+    });
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        repository,
+      },
+    });
+  }
+);
