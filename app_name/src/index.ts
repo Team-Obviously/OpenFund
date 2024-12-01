@@ -7,30 +7,32 @@ export default (app: Probot) => {
     const issueComment = context.issue({
       body: "Thanks for opening this issue!",
     });
-    console.log(issueComment);
     await context.octokit.issues.createComment(issueComment);
   });
 
   app.on("issue_comment.created", async (context) => {
-    const comment = context.payload.comment;
+    let comment = context.payload.comment;
+    comment['body']+= "Issue number: " + context.payload.issue.number;
     const issueNumber = context.payload.issue.number;
 
     console.log(`New comment on issue #${issueNumber}: ${comment.body}`);
 
-    // Check if comment body is a number
-    if (/^\d+$/.test(comment.body.trim())) {
-      await context.octokit.issues.addLabels({
-        ...context.repo(),
-        issue_number: issueNumber,
-        labels: [`number: ${comment.body}`]
-      });
+    if (comment.body.includes("@openfund-bot")) {
+      console.log("Bot was mentioned in the comment");
+      fetch("http://localhost:3001/api/bot/comment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(comment),
+      })
     }
   });
 
   app.on("issues.closed", async (context) => {
     const issue = context.payload.issue;
     const repo = context.repo();
-    
+
     // Get linked PRs through the search API
     const searchResult = await context.octokit.search.issuesAndPullRequests({
       q: `${issue.number} type:pr repo:${repo.owner}/${repo.repo}`,
@@ -43,13 +45,13 @@ export default (app: Probot) => {
     for (const pr of linkedPRs) {
       if (pr) {
         contributors.add(pr.user.login);
-        
+
         // Get PR reviews to find additional contributors
         const reviews = await context.octokit.pulls.listReviews({
           ...repo,
           pull_number: pr.number,
         });
-        
+
         reviews.data.forEach(review => {
           contributors.add(review.user.login);
         });

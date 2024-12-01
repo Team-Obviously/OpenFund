@@ -26,7 +26,7 @@ const octokit = new Octokit({
 
 // Endpoint to add a comment to a GitHub issue
 app.post("/add-comment", async (req, res) => {
-  const { owner, repo, issue_number, comment } = req.body;
+  const { owner, repo, issue_number, comment, labels } = req.body;
 
   if (!owner || !repo || !issue_number || !comment) {
     return res.status(400).json({
@@ -44,6 +44,13 @@ const {
       repo,
       issue_number,
       body: comment,
+    });
+
+    octokit.rest.issues.addLabels({
+      owner,
+      repo,
+      issue_number,
+      labels: labels,
     });
 
     return res.status(200).json({
