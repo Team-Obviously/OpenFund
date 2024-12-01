@@ -10,6 +10,7 @@ export interface IUser extends Document {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+  walletAddress: string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -42,6 +43,10 @@ const userSchema = new Schema<IUser>(
     lastLogin: {
       type: Date,
       default: Date.now,
+    },
+    walletAddress: {
+      type: String,
+      default: "",
     },
   },
   {

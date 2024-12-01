@@ -7,13 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { postRequest } from '@/utility/generalServices'
-import { Github } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  // DialogDescription,
 } from '@/components/ui/dialog'
 
 interface LoginPageProps {
@@ -30,10 +29,8 @@ interface AuthResponse {
   auth_token: string
 }
 
-const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
-const REDIRECT_URI = `${window.location.origin}/github-auth`
-
-const OKTO_URL = 'https://sandbox-api.okto.tech/api/v2/authenticate'
+// const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
+// const REDIRECT_URI = `${window.location.origin}/github-auth`
 
 const LoginPage: React.FC<LoginPageProps> = ({
   setAuthToken,
@@ -41,10 +38,9 @@ const LoginPage: React.FC<LoginPageProps> = ({
   handleLogout,
 }) => {
   const navigate = useNavigate()
-  const { authenticate } = useOkto()!
+  const { authenticate, createWallet } = useOkto()!
   const [showUserDetailsForm, setShowUserDetailsForm] = useState(false)
-  const [showGithubAuth, setShowGithubAuth] = useState(false)
-  const [githubUsername, setGithubUsername] = useState('')
+  // const [showGithubAuth, setShowGithubAuth] = useState(false)
   const [name, setName] = useState('')
   const [oktoAuthResponse, setOktoAuthResponse] = useState<AuthResponse | null>(
     null
@@ -64,7 +60,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         try {
           if (authResponse) {
             setOktoAuthResponse(authResponse)
-            setShowGithubAuth(true) // Show GitHub auth first
+            setShowUserDetailsForm(true)
           } else if (error) {
             console.error('Okto authentication error:', error)
           }
@@ -75,25 +71,42 @@ const LoginPage: React.FC<LoginPageProps> = ({
     )
   }
 
-  const handleGithubAuth = () => {
-    const scope = 'read:user user:email'
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}`
-    window.location.href = githubAuthUrl
-  }
+  // const handleGithubAuth = () => {
+  //   const scope = 'read:user user:email'
+  //   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}`
+  //   window.location.href = githubAuthUrl
+  // }
 
   const handleSubmitUserDetails = async () => {
     if (!oktoAuthResponse) return
 
     try {
+      // Create account in backend
       const response = await postRequest('/auth/signup', {
         oktoAuthResponse,
         userDetails: {
           name,
-          githubUsername,
+          githubUsername: 'virajbhartiya',
         },
       })
+      console.log(response)
+      localStorage.setItem('user', JSON.stringify(response.data.data.user))
+      if (response.data.status === 'success') {
+        // After backend account creation, create wallet
+        const walletsData = await createWallet()
+        console.log('Wallet created:', walletsData)
 
-      if (response.success) {
+        const walletAddr = walletsData.wallets.find(
+          (wallet) => wallet.network_name === 'POLYGON_TESTNET_AMOY'
+        )?.address
+
+        const res = await postRequest(`/users/wallet`, {
+          walletAddress: walletAddr,
+          userId: response.data.data.user._id,
+        })
+        console.log(res)
+
+        // Set auth token and redirect
         setAuthToken(oktoAuthResponse.auth_token)
         setShowUserDetailsForm(false)
         navigate(`/dashboard/contributor`)
@@ -107,7 +120,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
     handleLogout()
     setOktoAuthResponse(null)
     setShowUserDetailsForm(false)
-    setShowGithubAuth(false)
+    // setShowGithubAuth(false)
     navigate('/')
   }
 
@@ -136,8 +149,8 @@ const LoginPage: React.FC<LoginPageProps> = ({
         </CardContent>
       </Card>
 
-      {/* GitHub Authentication Dialog */}
-      <Dialog open={showGithubAuth} onOpenChange={setShowGithubAuth}>
+      {/* Comment out or remove GitHub Authentication Dialog */}
+      {/* <Dialog open={showGithubAuth} onOpenChange={setShowGithubAuth}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Connect GitHub Account</DialogTitle>
@@ -158,9 +171,9 @@ const LoginPage: React.FC<LoginPageProps> = ({
             </Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
-      {/* User Details Form */}
+      {/* User Details Form - remove GitHub username field */}
       <Dialog open={showUserDetailsForm} onOpenChange={setShowUserDetailsForm}>
         <DialogContent>
           <DialogHeader>
@@ -176,19 +189,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
                 placeholder="Enter your full name"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="github">GitHub Username</Label>
-              <Input
-                id="github"
-                value={githubUsername}
-                onChange={(e) => setGithubUsername(e.target.value)}
-                placeholder="Enter your GitHub username"
-              />
-            </div>
-            <Button
-              onClick={handleSubmitUserDetails}
-              disabled={!githubUsername || !name}
-            >
+            <Button onClick={handleSubmitUserDetails} disabled={!name}>
               Complete Signup
             </Button>
           </div>

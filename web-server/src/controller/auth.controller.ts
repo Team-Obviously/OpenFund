@@ -149,3 +149,16 @@ export const signupWithOkto = catchAsync(
     });
   }
 );
+
+export const addWalletAddress = catchAsync(async (req: Request, res: Response) => {
+  const { walletAddress, userId } = req.body;
+  const user = await Users.findByIdAndUpdate(userId, {
+    walletAddress,
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: { user },
+  });
+}
+);
