@@ -7,7 +7,8 @@
     "start": "nodemon src/App.ts",
     "start_cron": "node backupCron.js",
     "build": "tsc --build",
-    "start:prod": "pm2 start App.ts --name 'servercode' && pm2 save"
+    "start:prod": "pm2 start App.ts --name 'servercode' && pm2 save",
+    "seed": "ts-node src/scripts/seedData.ts"
   },
   "keywords": [
     "Startup Marketplace"
