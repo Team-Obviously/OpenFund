@@ -7,16 +7,22 @@ import Repository from "../models/repository.model";
 
 export const newComment = catchAsync(async (req: Request, res: Response) => {
   try {
-    const { body, user, repository, owner, issueTitle, html_url, issue_url } =
-      req.body;
+    const {
+      body: commentBody,
+      issue_url,
+      html_url,
+      user,
+      repository,
+      owner,
+      issueTitle,
+    } = req.body;
 
-    const amountMatch = body.match(/send (\d+) Matic/i);
+    const amountMatch = commentBody.match(/@openfund-bot send (\d+) Matic/i);
     const amount = amountMatch ? parseInt(amountMatch[1]) : 0;
 
-    const issueNumberMatch = body.match(/Issue number: (\d+)/i);
+    const issueNumberMatch = commentBody.match(/Issue number: (\d+)/i);
     const issueNumber = issueNumberMatch ? parseInt(issueNumberMatch[1]) : null;
 
-    // Create new issue document
     const newIssue = new Issue({
       issueNumber,
       title: issueTitle,
