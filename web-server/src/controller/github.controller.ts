@@ -194,8 +194,9 @@ export const getUserRepositories = catchAsync(
       });
     }
 
-    const repositories = await Repository.find({ userId: userId })
-      .sort({ updatedAt: -1 });
+    const repositories = await Repository.find({ userId: userId }).sort({
+      updatedAt: -1,
+    });
 
     res.status(200).json({
       status: "success",
@@ -203,5 +204,27 @@ export const getUserRepositories = catchAsync(
         repositories,
       },
     });
+  }
+);
+
+export const getRepository = catchAsync(async (req: Request, res: Response) => {
+  const { repositoryId } = req.params;
+  const repository = await Repository.findById(repositoryId);
+  res.status(200).json({ status: "success", data: { repository } });
+});
+
+export const createRepository = catchAsync(
+  async (req: Request, res: Response) => {
+    const { name, fullName, description, url, maintainer } = req.body;
+    const repository = await Repository.create(
+      {
+        name,
+        description,
+        url,
+        maintainer,
+      },
+      { new: true }
+    );
+    res.status(200).json({ status: "success", data: { repository } });
   }
 );

@@ -1,24 +1,21 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { IUser } from "./user.model";
+import { IDonations } from "./donations.model";
 
 export interface IRepository extends Document {
   name: string;
-  fullName: string;
   description?: string;
   url: string;
-  owner: string;  // GitHub username of the owner
-  userId: Schema.Types.ObjectId;  // Reference to our User model
-  isPrivate: boolean;
   createdAt: Date;
   updatedAt: Date;
+  maintainer: IUser;
+  donators: IUser[];
+  donations: IDonations[];
 }
 
 const repositorySchema = new Schema<IRepository>(
   {
     name: {
-      type: String,
-      required: true,
-    },
-    fullName: {
       type: String,
       required: true,
     },
@@ -29,19 +26,15 @@ const repositorySchema = new Schema<IRepository>(
       type: String,
       required: true,
     },
-    owner: {
-      type: String,
-      required: true,
-    },
-    userId: {
+    maintainer: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
-    isPrivate: {
-      type: Boolean,
-      default: false,
-    }
+    donators: {
+      type: [Schema.Types.ObjectId],
+      ref: "User",
+    },
   },
   {
     timestamps: true,
@@ -50,4 +43,4 @@ const repositorySchema = new Schema<IRepository>(
 
 const Repository = mongoose.model<IRepository>("Repository", repositorySchema);
 
-export default Repository; 
+export default Repository;
