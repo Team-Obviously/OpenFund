@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react';
+import { MaintainerRepositoriesResponse, Repository } from '../../types/maintainer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Clock, Users, GitPullRequest, Plus, ExternalLink } from 'lucide-react'
@@ -33,47 +34,9 @@ interface Project {
   projectUrl: string
 }
 
-const MOCK_PROJECTS: Project[] = [
-  {
-    id: 1,
-    name: 'OSS Fund Backend',
-    description:
-      'Backend services and API endpoints powering the OSS Fund platform',
-    status: 'active',
-    contributorCount: 8,
-    pendingPRs: 3,
-    createdAt: '2024-01-01T00:00:00Z',
-    lastActivity: '2024-03-19T16:45:00Z',
-    projectUrl: 'https://github.com/oss-fund/backend',
-  },
-  {
-    id: 2,
-    name: 'Payment Integration SDK',
-    description:
-      'Official SDK for integrating payment processing with the OSS Fund platform',
-    status: 'completed',
-    contributorCount: 5,
-    pendingPRs: 0,
-    createdAt: '2023-11-15T00:00:00Z',
-    lastActivity: '2024-03-18T10:30:00Z',
-    projectUrl: 'https://github.com/oss-fund/payment-sdk',
-  },
-  {
-    id: 3,
-    name: 'Documentation Site',
-    description:
-      'Official documentation and guides for OSS Fund platform and related tools',
-    status: 'on-hold',
-    contributorCount: 3,
-    pendingPRs: 2,
-    createdAt: '2024-02-10T00:00:00Z',
-    lastActivity: '2024-03-15T09:20:00Z',
-    projectUrl: 'https://github.com/oss-fund/docs',
-  },
-]
-
 export function MaintainerDashboard() {
-  const [projects] = useState<Project[]>(MOCK_PROJECTS)
+  const [repositories, setRepositories] = useState<MaintainerRepositoriesResponse>();
+  const [loading, setLoading] = useState(true);
   const [showAddProject, setShowAddProject] = useState(false)
   const [newProject, setNewProject] = useState({
     name: '',
@@ -82,14 +45,28 @@ export function MaintainerDashboard() {
   })
   const navigate = useNavigate()
 
-  const totalContributors = projects.reduce(
-    (sum, project) => sum + project.contributorCount,
-    0
-  )
-  const totalPendingPRs = projects.reduce(
-    (sum, project) => sum + project.pendingPRs,
-    0
-  )
+  useEffect(() => {
+    const fetchRepositories = async () => {
+      try {
+        await getAllRepositories();
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching repositories:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchRepositories();
+  }, []);
+
+  // const totalContributors = repositories.reduce(
+  //   (sum, project) => sum + project.contributorCount,
+  //   0
+  // )
+  // const totalPendingPRs = repositories.reduce(
+  //   (sum, project) => sum + project.pendingPRs,
+  //   0
+  // )
 
   const handleAddProject = async () => {
     const userId = JSON.parse(localStorage.getItem('user')!)._id
@@ -100,6 +77,15 @@ export function MaintainerDashboard() {
     console.log(res)
     setShowAddProject(false)
     setNewProject({ name: '', description: '', projectUrl: '' })
+    getAllRepositories();
+  };
+
+  const userDetails = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const getAllRepositories = async () => {
+    const response = await postRequest('/repositories/maintainer', { maintainerId: userDetails._id });
+    console.log('ALLREPOS:: ', response.data);
+    setRepositories(response.data);
   }
 
   return (
@@ -187,10 +173,10 @@ export function MaintainerDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{projects.length}</div>
+                <div className="text-2xl font-bold">{repositories?.data.repositories.length ?? 0}</div>
               </CardContent>
             </Card>
-            <Card>
+            {/* <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Contributors
@@ -199,8 +185,8 @@ export function MaintainerDashboard() {
               <CardContent>
                 <div className="text-2xl font-bold">{totalContributors}</div>
               </CardContent>
-            </Card>
-            <Card>
+            </Card> */}
+            {/* <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Pending PRs
@@ -209,17 +195,17 @@ export function MaintainerDashboard() {
               <CardContent>
                 <div className="text-2xl font-bold">{totalPendingPRs}</div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Projects Grid */}
           <div className="grid grid-cols-1 gap-4">
-            {projects.map((project) => (
+            {repositories?.data.repositories.map((repo) => (
               <Card
-                key={project.id}
+                key={repo._id}
                 className="p-4 hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() =>
-                  navigate(`/dashboard/maintainer/projects/${project.id}`)
+                  navigate(`/dashboard/maintainer/projects/${repo._id}`)
                 }
               >
                 <div className="flex items-center justify-between">
@@ -227,15 +213,15 @@ export function MaintainerDashboard() {
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-lg hover:text-primary">
                         <Link
-                          to={project.projectUrl}
+                          to={repo.url}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {project.name}
+                          {repo.name}
                         </Link>
                       </h3>
                       <a
-                        href={project.projectUrl}
+                        // href={repo.projectUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-muted-foreground hover:text-primary"
@@ -243,39 +229,31 @@ export function MaintainerDashboard() {
                         <ExternalLink className="h-4 w-4" />
                       </a>
                       <Badge
-                        variant={
-                          project.status === 'active'
-                            ? 'secondary'
-                            : project.status === 'completed'
-                            ? 'outline'
-                            : 'default'
-                        }
+                        variant={'default'}
                       >
-                        {project.status}
+                        {
+                          repo.donations?.length ? 'Funded' : 'No Donations'
+                        }
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {project.description}
-                    </p>
+                    {/* <p className="text-sm text-muted-foreground">
+                      {repo.description}
+                    </p> */}
                   </div>
                   <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {project.contributorCount} contributors
+                        {repo.contributorCount} contributors
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2">
+                    </div> */}
+                    {/* <div className="flex items-center gap-2">
                       <GitPullRequest className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {project.pendingPRs} pending PRs
+                        {repo.pendingPRs} pending PRs
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4" />
-                      Last active:{' '}
-                      {new Date(project.lastActivity).toLocaleDateString()}
-                    </div>
+                    </div> */}
+                    
                   </div>
                 </div>
               </Card>

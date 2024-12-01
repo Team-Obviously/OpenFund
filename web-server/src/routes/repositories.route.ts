@@ -3,7 +3,7 @@ import {
   donateToRepository,
   getContributorsForRepository,
   getMyDonatedRepositories,
-  getRepositoryByOrganisation,
+  getRepositoryOfMaintainer,
   createRepository,
   getAllRepositories,
 } from "../controller/repositories.controller";
@@ -13,7 +13,7 @@ const router = Router();
 router.get("/all", getAllRepositories);
 router.get("/my/:userId", getMyDonatedRepositories);
 router.get("/contributors", getContributorsForRepository);
-router.get("/organisation", getRepositoryByOrganisation);
+router.post("/maintainer", getRepositoryOfMaintainer);
 router.post("/donate", donateToRepository);
 router.post("/create", createRepository);
 

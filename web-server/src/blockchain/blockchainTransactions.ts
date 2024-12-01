@@ -4,7 +4,9 @@ const contractArtifact = require('./artifacts-zk/contracts/Contract.sol/GitHubSt
 
 const provider = new ethers.JsonRpcProvider("https://rpc-amoy.polygon.technology");
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-const contractAddress = "0xae9b52cAf30f7412Fcdb3e3047402fD6947A62BC";
+// const contractAddress = "0xae9b52cAf30f7412Fcdb3e3047402fD6947A62BC";
+const contractAddress = "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"; //localhost deployment
+
 
 const contractABI = contractArtifact.abi;
 

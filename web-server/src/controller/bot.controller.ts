@@ -4,7 +4,7 @@ import { b } from "../baml_client/sync_client";
 import type { StakeComment } from "../baml_client/types";
 import { Issue } from "../models/issue.model";
 import Repository from "../models/repository.model";
-import { assignStakeToIssue } from "../blockchain/blockchainTransactions";
+import { assignStakeToIssue, donateToRepository } from "../blockchain/blockchainTransactions";
 
 export const newComment = catchAsync(async (req: Request, res: Response) => {
   try {
@@ -21,12 +21,12 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
     const response = await b.ExtractStakeComment(commentBody);
     console.log(response);
 
-    const balance = await assignStakeToIssue(
-      repository,
-      String(response.issue_number),
-      String(response.amount)
-    );
-    console.log(balance, issueTitle);
+    // const balance = await assignStakeToIssue(
+    //   repository,
+    //   String(response.issue_number),
+    //   String(response.amount)
+    // );
+    // console.log(balance, issueTitle);
 
     const newIssue = new Issue({
       issueNumber: response.issue_number,

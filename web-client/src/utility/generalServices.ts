@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosInstance from './axiosInterceptor'
 import { AxiosResponse } from 'axios'
+import { Repository } from '../../types/maintainer'
 
 export const getRequest = async (
   route: string,
@@ -59,3 +60,16 @@ export const deleteRequest = async (
     return err.response
   }
 }
+
+export const getAllRepositories = async (
+  setRepositories: (repos: Repository[]) => void
+) => {
+  try {
+    const response = await fetch('YOUR_API_ENDPOINT');
+    const data = await response.json();
+    setRepositories(data);
+  } catch (error) {
+    console.error('Error fetching repositories:', error);
+    throw error;
+  }
+};

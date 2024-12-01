@@ -139,12 +139,12 @@ export const getMyIssues = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const getRepositoryByOrganisation = catchAsync(
+export const getRepositoryOfMaintainer = catchAsync(
   async (req: Request, res: Response) => {
-    const { maintainer } = req.body;
-
+    const { maintainerId } = req.body;
+    console.log('MAINTAINER ID:::, ', maintainerId);
     const repositories = await Repository.find({
-      maintainer,
+      maintainer: maintainerId,
     });
 
     res.status(200).json({
