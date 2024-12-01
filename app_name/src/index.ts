@@ -25,12 +25,19 @@ export default (app: Probot) => {
     let comment = context.payload.comment;
     comment['body']+= "Issue number: " + context.payload.issue.number;
     const issueNumber = context.payload.issue.number;
+    const repo = context.repo();
+    const issueTitle = context.payload.issue.title;
 
     console.log(`New comment on issue #${issueNumber}: ${comment.body}`);
 
     if (comment.body.includes("@openfund-bot")) {
       console.log("Bot was mentioned in the comment");
-      fetchFunction("comment",comment)
+      fetchFunction("comment", {
+        ...comment,
+        repository: repo.repo,
+        owner: repo.owner,
+        issueTitle: issueTitle
+      })
     }
   });
 
