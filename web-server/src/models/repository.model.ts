@@ -39,9 +39,15 @@ const repositorySchema = new Schema<IRepository>(
       type: [Schema.Types.ObjectId],
       ref: "User",
     },
+    donations: {
+      type: [Schema.Types.ObjectId],
+      ref: "Donations",
+      default: [],
+    },
     issues: {
       type: [Schema.Types.ObjectId],
       ref: "Issue",
+      default: [],
     },
   },
   {

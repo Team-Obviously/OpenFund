@@ -11,7 +11,7 @@ import {
 const router = Router();
 
 router.get("/all", getAllRepositories);
-router.get("/my", getMyDonatedRepositories);
+router.get("/my/:userId", getMyDonatedRepositories);
 router.get("/contributors", getContributorsForRepository);
 router.get("/organisation", getRepositoryByOrganisation);
 router.post("/donate", donateToRepository);

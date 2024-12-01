@@ -4,17 +4,32 @@ import axios from "axios";
 import User from "../models/user.model";
 import Repository from "../models/repository.model";
 import { IUser } from "../models/user.model";
-import Donations from "../models/donations.model";
+import Donations, { IDonations } from "../models/donations.model";
 import { Issue } from "../models/issue.model";
 
 export const getAllRepositories = catchAsync(
   async (req: Request, res: Response) => {
-    const repositories = await Repository.find();
+    const repositories = await Repository.find().populate("donations");
+
+    // Calculate total amount for each repository
+    const repositoriesWithTotalAmount = repositories.map((repo) => {
+      const totalAmount = (repo.donations || []).reduce(
+        (acc, donation: IDonations) => {
+          return acc + (donation.amount || 0);
+        },
+        0
+      );
+
+      return {
+        ...repo.toObject(),
+        totalAmount,
+      };
+    });
 
     res.status(200).json({
       status: "success",
       data: {
-        repositories,
+        repositories: repositoriesWithTotalAmount,
       },
     });
   }
@@ -22,16 +37,19 @@ export const getAllRepositories = catchAsync(
 
 export const getMyDonatedRepositories = catchAsync(
   async (req: Request, res: Response) => {
-    const { userId } = req.body;
+    const { userId } = req.params;
+    const repositories = await Repository.find().populate("donations");
 
-    const repositories = await Repository.find({
-      donators: { $in: [userId] },
-    }).sort({ updatedAt: -1 });
+    const filteredRepo = repositories.filter((repo) => {
+      return repo.donations.some(
+        (donation) => donation.userId.toString() === userId
+      );
+    });
 
     res.status(200).json({
       status: "success",
       data: {
-        repositories,
+        repositories: filteredRepo,
       },
     });
   }
@@ -54,8 +72,9 @@ export const getContributorsForRepository = catchAsync(
 
 export const donateToRepository = catchAsync(
   async (req: Request, res: Response) => {
-    console.log(req.body);
     const { repositoryId, userId, amount } = req.body;
+    console.log(req.body);
+    // Find repository and initialize donations array if it doesn't exist
     const repository = await Repository.findById(repositoryId);
 
     if (!repository) {
@@ -68,7 +87,12 @@ export const donateToRepository = catchAsync(
     const donation = await Donations.create({
       userId,
       amount,
+      repository: repositoryId,
     });
+
+    if (!repository.donations) {
+      repository.donations = [];
+    }
 
     repository.donations.push(donation);
     await repository.save();
@@ -77,6 +101,7 @@ export const donateToRepository = catchAsync(
       status: "success",
       data: {
         repository,
+        donation,
       },
     });
   }
@@ -116,10 +141,10 @@ export const getMyIssues = catchAsync(async (req: Request, res: Response) => {
 
 export const getRepositoryByOrganisation = catchAsync(
   async (req: Request, res: Response) => {
-    const { organisationId } = req.body;
+    const { maintainer } = req.body;
 
     const repositories = await Repository.find({
-      organisation: organisationId,
+      maintainer,
     });
 
     res.status(200).json({

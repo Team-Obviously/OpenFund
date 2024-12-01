@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { getRequest, postRequest } from '@/utility/generalServices'
 import { useOkto } from 'okto-sdk-react'
-import { encodeDonateToRepository } from '@/utility/abiEncoder'
+import { Link } from 'react-router-dom'
 
 interface Organization {
   _id: string
@@ -25,26 +25,39 @@ interface Organization {
   githubUrl: string
 }
 
-interface Project {
+interface Donation {
+  _id: string
+  userId: string
+  amount: number
+}
+
+interface Repository {
   _id: string
   name: string
   description: string
-  organizationName: string
-  fundingGoal: number
+  maintainer: string
   currentFunding: number
+  fundingGoal: number
   status: 'active' | 'completed'
+  organizationName: string
+  url: string
+  totalDonations: number
+  totalAmount: number
+  donations: Donation[]
 }
 
 export function DonatorDashboard() {
-  const [organizations, setOrganizations] = useState<Organization[]>([])
-  const [projects, setProjects] = useState<Project[]>([])
-  const [donations, setDonations] = useState<Project[]>([])
+  // const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [projects, setProjects] = useState<Repository[]>([])
+  const [donations, setDonations] = useState<Repository[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState('organizations')
+  const [activeTab, setActiveTab] = useState('projects')
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Repository | null>(
+    null
+  )
   const [donationAmount, setDonationAmount] = useState('')
   const { executeRawTransaction } = useOkto()!
 
@@ -52,18 +65,18 @@ export function DonatorDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const [orgsResponse, projectsResponse, donationsResponse] =
-          await Promise.all([
-            getRequest('/organisations/all'),
-            getRequest('/repositories/all'),
-            getRequest('/repositories/my'),
-          ])
-        console.log(orgsResponse, projectsResponse, donationsResponse)
-        setOrganizations(
-          Array.isArray(orgsResponse.data.data.organisations)
-            ? orgsResponse.data.data.organisations
-            : []
-        )
+        const userId = JSON.parse(localStorage.getItem('user') || '{}')['_id']
+        const [projectsResponse, donationsResponse] = await Promise.all([
+          // getRequest('/organisations/all'),
+          getRequest('/repositories/all'),
+          getRequest(`/repositories/my/${userId}`),
+        ])
+        // console.log(orgsResponse)
+        // setOrganizations(
+        //   Array.isArray(orgsResponse.data.data.organisations)
+        //     ? orgsResponse.data.data.organisations
+        //     : []
+        // )
         setProjects(
           Array.isArray(projectsResponse.data.data.repositories)
             ? projectsResponse.data.data.repositories
@@ -86,7 +99,7 @@ export function DonatorDashboard() {
     fetchData()
   }, [])
 
-  const handleDonate = (project: Project) => {
+  const handleDonate = (project: Repository) => {
     setSelectedProject(project)
     setIsDialogOpen(true)
     setDonationAmount('')
@@ -94,30 +107,27 @@ export function DonatorDashboard() {
 
   const handleDonationSubmit = async () => {
     try {
-      const encodedData = encodeDonateToRepository(
-        selectedProject?.name || '',
-        donationAmount
-      )
-      console.log(encodedData)
-      const res = await executeRawTransaction({
-        network_name: 'POLYGON_TESTNET_AMOY',
-        transaction: {
-          to: encodedData.to,
-          data: encodedData.data,
-          value: encodedData.value,
-          from: '0x28bAF7e11B58cac537559380e388C46168220a7d',
-        },
-      })
-      console.log(res)
-      // setIsDialogOpen(false)
+      // const encodedData = encodeDonateToRepository(
+      //   selectedProject?.name || '',
+      //   donationAmount
+      // )
+      // const res = await executeRawTransaction({
+      //   network_name: 'POLYGON_TESTNET_AMOY',
+      //   transaction: encodedData,
+      // })
+      // console.log('Transaction:', res)
+
+      // if (res) {
       const userData = JSON.parse(localStorage.getItem('user') || '{}')
-      const re = await postRequest('/repositories/donate', {
+      await postRequest('/repositories/donate', {
         amount: donationAmount,
         repositoryId: selectedProject?._id,
         userId: userData._id,
       })
-      console.log(re)
-      // setIsDialogOpen(false)
+      setIsDialogOpen(false)
+      // Refresh data
+      window.location.reload()
+      // }
     } catch (error) {
       console.error('Donation failed:', error)
     }
@@ -140,12 +150,12 @@ export function DonatorDashboard() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
+          {/* <TabsTrigger value="organizations">Organizations</TabsTrigger> */}
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="my-donations">My Donations</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="organizations" className="space-y-4">
+        {/* <TabsContent value="organizations" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {organizations.map((org) => (
               <Card key={org._id}>
@@ -173,15 +183,22 @@ export function DonatorDashboard() {
               </Card>
             ))}
           </div>
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="projects" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {projects.map((project) => (
               <Card key={project._id}>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{project.name}</span>
+                  <div className="flex justify-between items-start">
+                    <Link
+                      to={project.url}
+                      className="hover:underline"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <CardTitle>{project.name}</CardTitle>
+                    </Link>
                     <Badge
                       variant={
                         project.status === 'active' ? 'default' : 'secondary'
@@ -189,7 +206,7 @@ export function DonatorDashboard() {
                     >
                       {project.status}
                     </Badge>
-                  </CardTitle>
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {project.description}
                   </p>
@@ -203,20 +220,16 @@ export function DonatorDashboard() {
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Funding Progress:</span>
+                      <span>Total Donations:</span>
                       <span className="font-medium">
-                        ${project.currentFunding} / ${project.fundingGoal}
+                        {project.totalDonations}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-blue-600 h-2.5 rounded-full"
-                        style={{
-                          width: `${
-                            (project.currentFunding / project.fundingGoal) * 100
-                          }%`,
-                        }}
-                      />
+                    <div className="flex justify-between text-sm">
+                      <span>Total Funding:</span>
+                      <span className="font-medium">
+                        ${project.totalAmount}
+                      </span>
                     </div>
                     <Button
                       className="w-full"
@@ -233,52 +246,55 @@ export function DonatorDashboard() {
 
         <TabsContent value="my-donations" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {donations.map((donation) => (
-              <Card key={donation._id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{donation.name}</span>
-                    <Badge
-                      variant={
-                        donation.status === 'active' ? 'default' : 'secondary'
-                      }
-                    >
-                      {donation.status}
-                    </Badge>
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {donation.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between text-sm">
-                      <span>Organization:</span>
-                      <span className="font-medium">
-                        {donation.organizationName}
-                      </span>
+            {donations.map((donation) => {
+              const myDonation = donation.donations.find(
+                (d) =>
+                  d.userId ===
+                  JSON.parse(localStorage.getItem('user') || '{}')._id
+              )
+
+              return (
+                <Card key={donation._id}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <Link
+                        to={donation.url}
+                        className="hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <CardTitle>{donation.name}</CardTitle>
+                      </Link>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Funding Progress:</span>
-                      <span className="font-medium">
-                        ${donation.currentFunding} / ${donation.fundingGoal}
-                      </span>
+                    <p className="text-sm text-muted-foreground">
+                      {donation.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between text-sm">
+                        <span>Organization:</span>
+                        <span className="font-medium">
+                          {donation.organizationName}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>My Donation:</span>
+                        <span className="font-medium">
+                          ${myDonation?.amount || 0}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Total Project Funding:</span>
+                        <span className="font-medium">
+                          ${donation.totalAmount}
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div
-                        className="bg-blue-600 h-2.5 rounded-full"
-                        style={{
-                          width: `${
-                            (donation.currentFunding / donation.fundingGoal) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
             {donations.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 You haven't made any donations yet.
