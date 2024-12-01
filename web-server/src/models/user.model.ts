@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// Define the interface for User document
 export interface IUser extends Document {
   oktoAuthToken: string;
   oktoRefreshToken: string;

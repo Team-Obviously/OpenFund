@@ -3,12 +3,14 @@ import LoginPage from '@/pages/Signup'
 import { useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
-import ContributorDashboard from '@/pages/dashboards/ContributorDashboard'
-import MaintainerDashboard from '@/pages/dashboards/MaintainerDashboard'
+import { ContributorDashboard } from '@/pages/dashboards/ContributorDashboard'
+import { MaintainerDashboard } from '@/pages/dashboards/MaintainerDashboard'
 import { DonatorDashboard } from '@/pages/dashboards/DonatorDashboard'
 import { RepositoriesPage } from '@/pages/project/RepositoriesPage'
 import { RepositoryDetailsPage } from '@/pages/project/repository-details'
 import { GitHubCallback } from '@/pages/GithubCallback'
+import { ProjectDetails } from '@/pages/dashboards/ProjectDetails'
+import { ContributionDetails } from '@/pages/dashboards/ContributionDetails'
 
 const AppRoutes = () => {
   const [authToken, setAuthToken] = useState<string | null>(null)
@@ -41,6 +43,14 @@ const AppRoutes = () => {
         element={<RepositoryDetailsPage />}
       />
       <Route path="/github-auth" element={<GitHubCallback />} />
+      <Route
+        path="/dashboard/maintainer/projects/:projectId"
+        element={<ProjectDetails />}
+      />
+      <Route
+        path="/dashboard/contributor/contributions/:contributionId"
+        element={<ContributionDetails />}
+      />
     </Routes>
   )
 }
