@@ -1,0 +1,6 @@
+repo name, required 
+owner name, not so required
+
+
+thirdweb secret key = eigA3sinaIMur_gNfU7ILiZqqm0O5VFvfW6gquafLfGYb4kUNxdajhmzXzViBoq-aXDLSVg6njOWn5yPB4ccTg
+client id = c9f88d5956258aa354a6fbc905fc59b3
