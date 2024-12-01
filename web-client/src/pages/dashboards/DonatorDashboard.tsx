@@ -17,6 +17,7 @@ import { getRequest, postRequest } from '@/utility/generalServices'
 import { useOkto } from 'okto-sdk-react'
 import { Link } from 'react-router-dom'
 import { DashboardNav } from '@/components/ui/dashboard-nav'
+import confetti from 'canvas-confetti'
 
 // interface Organization {
 //   _id: string
@@ -106,6 +107,31 @@ export function DonatorDashboard() {
     setDonationAmount('')
   }
 
+  const triggerConfetti = () => {
+    // First burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    })
+
+    // Side cannons
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 80,
+        origin: { x: 0 },
+      })
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 80,
+        origin: { x: 1 },
+      })
+    }, 200)
+  }
+
   const handleDonationSubmit = async () => {
     try {
       // const encodedData = encodeDonateToRepository(
@@ -120,15 +146,19 @@ export function DonatorDashboard() {
 
       // if (res) {
       const userData = JSON.parse(localStorage.getItem('user') || '{}')
-      await postRequest('/repositories/donate', {
+      const response = await postRequest('/repositories/donate', {
         amount: donationAmount,
         repositoryId: selectedProject?._id,
         userId: userData._id,
       })
-      setIsDialogOpen(false)
-      // Refresh data
-      window.location.reload()
-      // }
+
+      if (response.data.status === 'success') {
+        triggerConfetti()
+        setIsDialogOpen(false)
+        setTimeout(() => {
+          window.location.reload()
+        }, 4000)
+      }
     } catch (error) {
       console.error('Donation failed:', error)
     }
