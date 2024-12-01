@@ -2,10 +2,12 @@
 import { Probot } from "probot";
 
 export default (app: Probot) => {
+
   app.on("issues.opened", async (context) => {
     const issueComment = context.issue({
       body: "Thanks for opening this issue!",
     });
+    console.log(issueComment);
     await context.octokit.issues.createComment(issueComment);
   });
 
@@ -14,6 +16,15 @@ export default (app: Probot) => {
     const issueNumber = context.payload.issue.number;
 
     console.log(`New comment on issue #${issueNumber}: ${comment.body}`);
+
+    // Check if comment body is a number
+    if (/^\d+$/.test(comment.body.trim())) {
+      await context.octokit.issues.addLabels({
+        ...context.repo(),
+        issue_number: issueNumber,
+        labels: [`number: ${comment.body}`]
+      });
+    }
   });
 
   app.on("issues.closed", async (context) => {

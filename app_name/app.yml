@@ -140,6 +140,3 @@ default_permissions:
 # Default: true
 # public: false
 
-# Subscribe to these events
-subscriptions:
-  issue_comment: true
