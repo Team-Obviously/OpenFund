@@ -44,7 +44,6 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
     const updatedRepo = await Repository.findOneAndUpdate(
       {
         name: repository,
-        organizationName: owner,
       },
       {
         $push: { issues: savedIssue._id },
