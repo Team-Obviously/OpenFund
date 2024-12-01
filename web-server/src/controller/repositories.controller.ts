@@ -142,15 +142,34 @@ export const getMyIssues = catchAsync(async (req: Request, res: Response) => {
 export const getRepositoryOfMaintainer = catchAsync(
   async (req: Request, res: Response) => {
     const { maintainerId } = req.body;
-    console.log('MAINTAINER ID:::, ', maintainerId);
-    const repositories = await Repository.find({
-      maintainer: maintainerId,
+    console.log("MAINTAINER ID:::, ", maintainerId);
+    const repositories = await Repository.find().populate("donations");
+
+    const filteredRepo = repositories.filter((repo) => {
+      return repo.maintainer.toString() === maintainerId;
     });
 
     res.status(200).json({
       status: "success",
       data: {
-        repositories,
+        repositories: filteredRepo,
+      },
+    });
+  }
+);
+
+export const getRepositoriesWithIssues = catchAsync(
+  async (req: Request, res: Response) => {
+    const { repositoryId } = req.body;
+
+    const repository = await Repository.findById(repositoryId).populate(
+      "issues"
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        repository,
       },
     });
   }
