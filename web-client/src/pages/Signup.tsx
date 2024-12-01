@@ -33,6 +33,8 @@ interface AuthResponse {
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID
 const REDIRECT_URI = `${window.location.origin}/github-auth`
 
+const OKTO_URL = 'https://sandbox-api.okto.tech/api/v2/authenticate'
+
 const LoginPage: React.FC<LoginPageProps> = ({
   setAuthToken,
   authToken,

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  donateToRepository,
   getContributorsForRepository,
   getMyDonatedRepositories,
   getRepositoryByOrganisation,
@@ -13,6 +14,7 @@ router.get("/all", getAll(Repository));
 router.get("/my", getMyDonatedRepositories);
 router.get("/contributors", getContributorsForRepository);
 router.get("/organisation", getRepositoryByOrganisation);
+router.post("/donate", donateToRepository);
 
 // router.get("/:repositoryId", getRepository);
 // router.post("/", createRepository);
