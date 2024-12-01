@@ -4,6 +4,7 @@ import { b } from "../baml_client/sync_client";
 import type { StakeComment } from "../baml_client/types";
 import { Issue } from "../models/issue.model";
 import Repository from "../models/repository.model";
+import { assignStakeToIssue } from "../blockchain/blockchainTransactions";
 
 export const newComment = catchAsync(async (req: Request, res: Response) => {
   try {
@@ -16,17 +17,17 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
       owner,
       issueTitle,
     } = req.body;
+    
+    const response = await b.ExtractStakeComment(commentBody);  
+    console.log(response);
 
-    const amountMatch = commentBody.match(/@openfund-bot send (\d+) Matic/i);
-    const amount = amountMatch ? parseInt(amountMatch[1]) : 0;
-
-    const issueNumberMatch = commentBody.match(/Issue number: (\d+)/i);
-    const issueNumber = issueNumberMatch ? parseInt(issueNumberMatch[1]) : null;
-
+    const balance = await assignStakeToIssue(repository, String(response.issue_number), String(response.amount));
+    console.log(balance, issueTitle);
+    
     const newIssue = new Issue({
-      issueNumber,
+      issueNumber: response.issue_number,
       title: issueTitle,
-      amount,
+      amount: response.amount,
       status: "open",
       creator: user.login,
       assignee: null,
