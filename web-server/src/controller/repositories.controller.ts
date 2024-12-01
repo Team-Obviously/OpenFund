@@ -122,3 +122,20 @@ export const getMyIssues = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+
+export const getRepositoryByOrganisation = catchAsync(
+  async (req: Request, res: Response) => {
+    const { organisationId } = req.body;
+
+    const repositories = await Repository.find({
+      organisation: organisationId,
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        repositories,
+      },
+    });
+  }
+);

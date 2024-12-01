@@ -2,6 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 import { IUser } from "./user.model";
 import { IDonations } from "./donations.model";
 import { IIssue } from "./issue.model";
+import { IOrganisation } from "./organisation.model";
 
 export interface IRepository extends Document {
   name: string;
@@ -10,6 +11,7 @@ export interface IRepository extends Document {
   createdAt: Date;
   updatedAt: Date;
   maintainer: IUser;
+  organisation: IOrganisation;
   donators: IUser[];
   donations: IDonations[];
   contributors: IUser[];
