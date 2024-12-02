@@ -58,7 +58,7 @@ export function WalletInfo() {
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Chain:</span>
             <div className="flex gap-2">
-              <span className="text-sm font-medium">Polygon Testnet Amoy</span>
+              <span className="text-sm font-medium">Base</span>
             </div>
           </div>
         </div>
