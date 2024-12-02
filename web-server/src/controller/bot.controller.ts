@@ -4,7 +4,11 @@ import { b } from "../baml_client/sync_client";
 import type { StakeComment } from "../baml_client/types";
 import { Issue } from "../models/issue.model";
 import Repository from "../models/repository.model";
-import { assignStakeToIssue, distributeStakeToResolvers, donateToRepository } from "../blockchain/blockchainTransactions";
+import {
+  assignStakeToIssue,
+  distributeStakeToResolvers,
+  donateToRepository,
+} from "../blockchain/blockchainTransactions";
 import axios from "axios";
 import User, { IUser } from "../models/user.model";
 
@@ -22,7 +26,6 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
 
     const response = await b.ExtractStakeComment(commentBody);
     console.log(response);
-
 
     const newIssue = new Issue({
       issueNumber: response.issue_number,
@@ -67,17 +70,22 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
       owner: owner,
       repo: repository,
       issue_number: response.issue_number,
-      comment: "Now this issue has been funded by " + response.amount + "matic. Solve it to earn the stake!",
+      comment:
+        "Now this issue has been funded by " +
+        response.amount +
+        "matic. Solve it to earn the stake!",
     });
 
     // assign stake to issue
     try {
-      const tx = await assignStakeToIssue(repository, String(response.issue_number), String(response.amount));
-
+      const tx = await assignStakeToIssue(
+        repository,
+        String(response.issue_number),
+        String(response.amount)
+      );
     } catch (error) {
-      console.error('Error in ASSIGN STAKE TO ISSUE::: ', error);
+      console.error("Error in ASSIGN STAKE TO ISSUE::: ", error);
     }
-
 
     return res.status(200).json({
       success: true,
@@ -98,7 +106,7 @@ export const newComment = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const closeIssue = catchAsync(async (req: Request, res: Response) => {
-  console.log('REQUEST BODY::: ', req.body);
+  console.log("REQUEST BODY::: ", req.body);
 
   const { issue, contributors, linkedPRs } = req.body;
   console.log(req.body.issue.number);
@@ -106,6 +114,7 @@ export const closeIssue = catchAsync(async (req: Request, res: Response) => {
 
   const currentIssue = await Issue.findOne({
     issueNumber: issue.number,
+    closedBy: "virajbhartiya",
   });
 
   if (!currentIssue) {
@@ -126,24 +135,31 @@ export const closeIssue = catchAsync(async (req: Request, res: Response) => {
 
   // fetch the user details from the contributors list and create a new array of wallet addresses
   const users = await User.find();
-  const addresses = contributors.map((contributor: string) => users.find((user) => user.githubUsername === contributor)?.walletAddress);
+  const addresses = contributors.map(
+    (contributor: string) =>
+      users.find((user) => user.githubUsername === contributor)?.walletAddress
+  );
 
-  console.log('ADDRESSES::: ', addresses);
+  console.log("ADDRESSES::: ", addresses);
   // get the repository name from the issue_url
-  const repositoryName = issue.url.split('/').slice(3, 5).join('/');
+  const repositoryName = issue.url.split("/").slice(3, 5).join("/");
   const issueNumber = issue.number;
   const resolvers = addresses;
   // equal distribution
-  const distributions = addresses.map((address: string) => String(currentIssue.amount / addresses.length));
+  const distributions = addresses.map((address: string) =>
+    String(currentIssue.amount / addresses.length)
+  );
 
   try {
-    const tx = await distributeStakeToResolvers(repositoryName, issueNumber, resolvers, distributions);
-
+    const tx = await distributeStakeToResolvers(
+      repositoryName,
+      issueNumber,
+      resolvers,
+      distributions
+    );
   } catch (error) {
-    console.error('Error in DISTRIBUTE STAKE TO RESOLVERS::: ', error);
+    console.error("Error in DISTRIBUTE STAKE TO RESOLVERS::: ", error);
   }
-
-
 
   res.status(200).json({
     status: "success",

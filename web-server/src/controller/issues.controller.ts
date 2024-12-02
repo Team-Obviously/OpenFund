@@ -41,3 +41,20 @@ export const getMyIssues = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+
+export const getMyContributedIssues = catchAsync(
+  async (req: Request, res: Response) => {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
+    const issues = await Issue.find({
+      closedBy: user.githubUsername,
+    }).sort({ updatedAt: -1 });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        issues,
+      },
+    });
+  }
+);
