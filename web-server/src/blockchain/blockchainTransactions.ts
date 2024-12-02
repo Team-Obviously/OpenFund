@@ -4,8 +4,8 @@ const contractArtifact = require('./artifacts-zk/contracts/Contract.sol/GitHubSt
 
 const provider = new ethers.JsonRpcProvider("https://rpc-amoy.polygon.technology");
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-// const contractAddress = "0xae9b52cAf30f7412Fcdb3e3047402fD6947A62BC";
-const contractAddress = "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"; //localhost deployment
+const contractAddress = "0xae9b52cAf30f7412Fcdb3e3047402fD6947A62BC";
+// const contractAddress = "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"; //localhost deployment
 
 
 const contractABI = contractArtifact.abi;
@@ -22,29 +22,31 @@ async function getWalletBalance(): Promise<string> {
     }
 }
 
-async function registerRepository(repoName: string): Promise<void> {
+async function registerRepository(repoName: string): Promise<ethers.TransactionResponse> { //DONE
     try {
         const tx = await contract.registerRepository(repoName);
         await tx.wait();
+        return tx;
     } catch (error) {
         console.error('Error registering repository:', error);
         throw error;
     }
 }
 
-async function donateToRepository(repoName: string, amount: string): Promise<void> {
+async function donateToRepository(repoName: string, amount: string): Promise<ethers.TransactionResponse> {
     try {
         const tx = await contract.donateToRepository(repoName, {
             value: ethers.parseEther(amount)
         });
         await tx.wait();
+        return tx;
     } catch (error) {
         console.error('Error donating to repository:', error);
         throw error;
     }
 }
 
-async function assignStakeToIssue(repoName: string, issueName: string, amount: string): Promise<void> {
+async function assignStakeToIssue(repoName: string, issueName: string, amount: string): Promise<ethers.TransactionResponse> { //DONE
     try {
         const tx = await contract.assignStakeToIssue(
             repoName,
@@ -52,6 +54,7 @@ async function assignStakeToIssue(repoName: string, issueName: string, amount: s
             ethers.parseEther(amount)
         );
         await tx.wait();
+        return tx;
     } catch (error) {
         console.error('Error assigning stake to issue:', error);
         throw error;
@@ -63,7 +66,7 @@ async function distributeStakeToResolvers(
     issueName: string,
     resolvers: string[],
     distributions: string[]
-): Promise<void> {
+): Promise<ethers.TransactionResponse> {
     try {
         const distributionsInWei = distributions.map(amount => ethers.parseEther(amount));
         
@@ -74,6 +77,7 @@ async function distributeStakeToResolvers(
             distributionsInWei
         );
         await tx.wait();
+        return tx;
     } catch (error) {
         console.error('Error distributing stake:', error);
         throw error;
