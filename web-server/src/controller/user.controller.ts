@@ -4,7 +4,7 @@ import { IBaseRequest } from "../Interfaces/utils/utils.interfaces";
 import { Document } from "mongoose";
 import { catchAsync } from "../utils/utils";
 import UserModel from "../models/user.model";
-import Issue from "../models/issue.model";
+import { Issue } from "../models/issue.model";
 import { IIssue } from "../models/issue.model";
 
 // TODO: update me
@@ -40,7 +40,7 @@ export const getMyEarnings = catchAsync(async (req: Request, res: Response) => {
   });
 
   const earnings = issues.reduce(
-    (acc: number, issue: IIssue) => acc + issue.bounty.amount,
+    (acc: number, issue: IIssue) => acc + issue.amount,
     0
   );
 
