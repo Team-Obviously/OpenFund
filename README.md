@@ -1,55 +1,68 @@
 # OpenFund
 
-OpenFund is a decentralized platform that connects open-source projects with donors, enabling sustainable funding for the open-source ecosystem. The platform allows maintainers to list their projects and receive donations, while donors can discover and support promising open-source initiatives.
+OpenFund is a cutting-edge decentralized platform designed to revolutionize funding for the open-source ecosystem. By connecting open-source maintainers with donors, OpenFund ensures sustainable growth and development in the community. Donors can discover and support impactful projects, while maintainers receive the financial backing they need to innovate.
 
-## Features
+---
 
-- **Project Funding**: Seamless donation process using cryptocurrency
-- **GitHub Integration**: Direct connection with GitHub repositories and issues
-- **Smart Contract Integration**: Secure and transparent fund management
-- **Multi-wallet Support**: Integration with Okto SDK for wallet management
-- **Project Discovery**: Browse and search open-source projects
-- **Contributor Dashboard**: Track contributions and manage projects
-- **Donor Dashboard**: Monitor donations and discover new projects
+## 🌟 Features
 
-## Tech Stack
+- **Seamless Project Funding**: Effortlessly make donations using cryptocurrency.
+- **GitHub Integration**: Link directly to GitHub repositories and manage issues.
+- **Secure Smart Contracts**: Transparent fund management via blockchain.
+- **Multi-Wallet Support**: Leverage the Okto SDK for smooth wallet management.
+- **Project Discovery**: Explore and search for open-source initiatives.
+- **Contributor Dashboard**: Manage projects and track contributions with ease.
+- **Donor Dashboard**: Discover new projects and monitor donation impact.
+- **AI Agent Integration**: Automate smart contract actions with natural language commands.
+
+---
+
+## 🛠 Tech Stack
 
 ### Frontend
-- React with TypeScript
-- Vite for build tooling
-- TailwindCSS for styling
-- Radix UI components
-- React Router for navigation
-- Okto SDK for wallet integration
+
+- **Framework**: React with TypeScript
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS
+- **UI Components**: Radix UI
+- **Routing**: React Router
+- **Wallet Integration**: Okto SDK
 
 ### Backend
-- Node.js with Express
-- TypeScript
-- MongoDB with Mongoose
-- JWT authentication
-- GitHub OAuth integration
-- Passport.js for authentication
+
+- **Runtime**: Node.js with Express
+- **Language**: TypeScript
+- **Database**: MongoDB with Mongoose
+- **Authentication**: JWT and GitHub OAuth (via Passport.js)
+- **AI Integration**: BAML Boundary ML for intent-based smart contract execution
+- **GitHub Tools**: Octokit and Probot for automation
 
 ### Smart Contracts
-- Solidity
-- Hardhat for development
-- zkSync for scaling
-- Polygon network support
 
-## Project Structure
+- **Language**: Solidity
+- **Local Development**: Hardhat
+- **Scaling**: zkSync
+- **Blockchain Support**: Polygon network
+- **Tooling**: Thirdweb for smart contract creation, deployment, and testing
+- **Libraries**: Ethers.js and Chai.js for contract testing
 
-The project consists of several key components:
+---
 
-- `web-client/`: React frontend application
-- `web-server/`: Express backend server
-- `contract/`: Smart contract implementation
+## 📁 Project Structure
+
+The project is organized into modular components:
+
+- `web-client/`: React-based frontend application
+- `web-server/`: Node.js backend server
+- `contract/`: Smart contract implementations
 - `contract-testing/`: Smart contract test suite
 - `github-server/`: GitHub integration service
-- `baml_client/`: BAML client implementation
-- `src/`: Core source code
-- `app_name/`: Application specific implementation
+- `baml_client/`: BAML client for AI integration
+- `app_name/`: GitHub bot implementation
 
-## Getting Started
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -57,79 +70,105 @@ The project consists of several key components:
 - MongoDB
 - Git
 - Okto Wallet
-- Metamask or compatible Web3 wallet
+- MetaMask or compatible Web3 wallet
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/openfund.git
-cd openfund
-```
+1. **Clone the repository:**
 
-2. Set up the web client:
-```bash
-cd web-client
-npm install
-cp .env.example .env # Configure your environment variables
-npm run dev
-```
+   ```bash
+   git clone https://github.com/yourusername/openfund.git
+   cd openfund
+   ```
+2. **Set up the web client:**
 
-3. Set up the web server:
-```bash
-cd ../web-server
-npm install
-cp .env.example .env # Configure your environment variables
-npm run start
-```
+   ```bash
+   cd web-client
+   npm install
+   cp .env.example .env # Configure your environment variables
+   npm run dev
+   ```
+3. **Set up the web server:**
 
-4. Configure environment variables:
+   ```bash
+   cd ../web-server
+   npm install
+   cp .env.example .env # Configure your environment variables
+   npm run start
+   ```
+4. **Configure environment variables:**
+
    - MongoDB connection string
    - GitHub OAuth credentials
    - JWT secret
    - Okto SDK keys
    - Smart contract addresses
 
-## Development
+---
 
-Each component can be developed independently:
+## 🛠 Development
+
+Each component can be developed and tested independently:
 
 ### Web Client
+
 ```bash
 cd web-client
 npm run dev
 ```
 
 ### Web Server
+
 ```bash
 cd web-server
 npm run start
 ```
 
 ### Smart Contracts
+
 ```bash
 cd contract
 npm install
-npx hardhat compile
-npx hardhat test
+npx thirdweb build
+npx thirdweb deploy
 ```
 
-## Contributing
+---
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 🤝 Contributing
 
-## License
+We welcome contributions to OpenFund! Here’s how you can get started:
 
-This project is licensed under the terms of the license included with this software.
+1. **Fork the repository**
+2. **Create a feature branch:**
 
-## Support
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Commit your changes:**
 
-Please open an issue for:
-- Bug reports
+   ```bash
+   git commit -m 'Add some amazing feature'
+   ```
+4. **Push to the branch:**
+
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request**
+
+---
+
+
+## 💬 Support
+
+For any queries, suggestions, or issues, please open an issue on GitHub. We encourage you to report:
+
+- Bugs
 - Feature requests
 - General questions
 - Support requests
+
+---
+
+Join us in empowering the open-source community through sustainable funding with OpenFund!
