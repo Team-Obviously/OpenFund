@@ -2,15 +2,6 @@ import { useEffect, useState } from 'react'
 import { useOkto } from 'okto-sdk-react'
 import { Card, CardContent } from './ui/card'
 
-interface Portfolio {
-  token_name: string
-  quantity: string
-  amount_in_inr: string
-  token_image: string
-  token_address: string
-  network_name: string
-}
-
 export function WalletInfo() {
   const { getWallets, getPortfolio } = useOkto()!
   const [wallet, setWallet] = useState<string>('')
@@ -21,7 +12,7 @@ export function WalletInfo() {
       try {
         const wallets = await getWallets()
         const polygonWallet = wallets.wallets.find(
-          (w) => w.network_name === 'POLYGON_TESTNET_AMOY'
+          (w) => w.network_name === 'BASE'
         )
         if (polygonWallet) {
           setWallet(polygonWallet.address)

@@ -97,7 +97,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
         console.log('Wallet created:', walletsData)
 
         const walletAddr = walletsData.wallets.find(
-          (wallet) => wallet.network_name === 'POLYGON_TESTNET_AMOY'
+          (wallet) => wallet.network_name === 'BASE'
         )?.address
 
         const res = await postRequest(`/users/wallet`, {

@@ -140,7 +140,7 @@ export function DonatorDashboard() {
       //   donationAmount
       // )
       // const res = await executeRawTransaction({
-      //   network_name: 'POLYGON_TESTNET_AMOY',
+      //   network_name: 'BASE',
       //   transaction: encodedData,
       // })
       // console.log('Transaction:', res)
