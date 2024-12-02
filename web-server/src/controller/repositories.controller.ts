@@ -7,7 +7,10 @@ import { IUser } from "../models/user.model";
 import Donations, { IDonations } from "../models/donations.model";
 import { Issue, IIssue } from "../models/issue.model";
 import mongoose from "mongoose";
-import { donateToRepository as donateToRepositoryBlockchain, registerRepository } from "../blockchain/blockchainTransactions";
+import {
+  donateToRepository as donateToRepositoryBlockchain,
+  registerRepository,
+} from "../blockchain/blockchainTransactions";
 
 type DonationType = {
   _id: mongoose.Types.ObjectId;
@@ -144,11 +147,13 @@ export const donateToRepository = catchAsync(
 
     // Donate to repository on blockchain
     try {
-      const tx = await donateToRepositoryBlockchain(repository.name, String(amount));
-      console.log('TX in DONATE TO REPO::: ', tx);
-
+      const tx = await donateToRepositoryBlockchain(
+        repository.name,
+        String(amount)
+      );
+      console.log("TX in DONATE TO REPO::: ", tx);
     } catch (error) {
-      console.error('Error in DONATE TO REPO::: ', error);
+      console.error("Error in DONATE TO REPO::: ", error);
     }
 
     res.status(200).json({
@@ -221,95 +226,6 @@ export const getRepositoriesWithIssues = catchAsync(
       .populate("donations")
       .populate("donators");
 
-    // Add dummy data if fields are empty
-    const dummyData = {
-      issues: repository.issues.length
-        ? repository.issues
-        : [
-          {
-            issueNumber: 1,
-            title: "Sample Issue 1",
-            amount: 100,
-            status: "open",
-            creator: "dummyUser",
-            assignee: null,
-            repository: repository.name,
-            organizationName: "dummyOrg",
-            issueUrl: "https://example.com",
-            htmlUrl: "https://example.com",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as IIssue,
-          {
-            issueNumber: 2,
-            title: "Sample Issue 2",
-            amount: 200,
-            status: "open",
-            creator: "dummyUser",
-            assignee: null,
-            repository: repository.name,
-            organizationName: "dummyOrg",
-            issueUrl: "https://example.com",
-            htmlUrl: "https://example.com",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as IIssue,
-        ],
-      donations: repository.donations.length
-        ? repository.donations
-        : [
-          {
-            _id: new mongoose.Types.ObjectId(),
-            amount: 500,
-            userId: "dummy1",
-            repository: repository._id,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as DummyTypes["donation"],
-          {
-            _id: new mongoose.Types.ObjectId(),
-            amount: 300,
-            userId: "dummy2",
-            repository: repository._id,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as DummyTypes["donation"],
-        ],
-      donators: repository.donators.length
-        ? repository.donators
-        : [
-          {
-            _id: new mongoose.Types.ObjectId(),
-            name: "John Doe",
-            email: "john@example.com",
-            oktoAuthToken: "",
-            oktoRefreshToken: "",
-            oktoDeviceToken: "",
-            githubUsername: "johndoe",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as DummyTypes["user"],
-          {
-            _id: new mongoose.Types.ObjectId(),
-            name: "Jane Smith",
-            email: "jane@example.com",
-            oktoAuthToken: "",
-            oktoRefreshToken: "",
-            oktoDeviceToken: "",
-            githubUsername: "janesmith",
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          } as DummyTypes["user"],
-        ],
-    };
-
-    const responseData = {
-      ...repository.toObject(),
-      issues: dummyData.issues,
-      donations: dummyData.donations,
-      donators: dummyData.donators,
-    };
-
     res.status(200).json({
       status: "success",
       data: {
@@ -333,9 +249,9 @@ export const createRepository = catchAsync(
     // Register repository on blockchain
     try {
       const tx = await registerRepository(name);
-      console.log('TX in REGISTER REPO::: ', tx);
+      console.log("TX in REGISTER REPO::: ", tx);
     } catch (error) {
-      console.error('Error in REGISTER REPO::: ', error);
+      console.error("Error in REGISTER REPO::: ", error);
     }
 
     res.status(201).json({
