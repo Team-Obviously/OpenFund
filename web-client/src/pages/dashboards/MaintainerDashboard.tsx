@@ -18,6 +18,7 @@ import { SidebarInset } from '@/components/ui/sidebar'
 import { Link, useNavigate } from 'react-router-dom'
 import { postRequest } from '@/utility/generalServices'
 import { DashboardNav } from '@/components/ui/dashboard-nav'
+import { WalletInfo } from '@/components/WalletInfo'
 
 export function MaintainerDashboard() {
   const [repositories, setRepositories] =
@@ -143,6 +144,7 @@ export function MaintainerDashboard() {
         </header>
 
         <div className="flex flex-1 flex-col gap-6 p-4">
+          <WalletInfo />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">

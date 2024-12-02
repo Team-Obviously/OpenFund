@@ -18,6 +18,7 @@ import { useOkto } from 'okto-sdk-react'
 import { Link } from 'react-router-dom'
 import { DashboardNav } from '@/components/ui/dashboard-nav'
 import confetti from 'canvas-confetti'
+import { WalletInfo } from '@/components/WalletInfo'
 
 // interface Organization {
 //   _id: string
@@ -176,6 +177,7 @@ export function DonatorDashboard() {
     <div className="flex flex-col h-screen">
       <DashboardNav />
       <div className="p-6 space-y-6 flex-1">
+        <WalletInfo />
         <div className="flex items-center gap-4">
           <BackButton />
           <h1 className="text-2xl font-bold">Donator Dashboard</h1>

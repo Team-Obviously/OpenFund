@@ -76,10 +76,12 @@ export default (app: Probot) => {
     console.log('Linked PRs:', linkedPRs.map(pr => `#${pr.number}`).join(', ') || 'None');
     console.log('Contributors:', Array.from(contributors).join(', ') || 'None');
 
-    fetchFunction("closed",{
+    fetchFunction("closed", {
       issue: issue,
       contributors: Array.from(contributors),
-      linkedPRs: Array.from(linkedPRs)
+      linkedPRs: Array.from(linkedPRs),
+      repository: repo.repo,
+      owner: repo.owner
     })
   });
 };
