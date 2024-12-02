@@ -57,7 +57,7 @@ The project is organized into modular components:
 - `contract/`: Smart contract implementations
 - `contract-testing/`: Smart contract test suite
 - `github-server/`: GitHub integration service
-- `baml_client/`: BAML client for AI integration
+- `baml_client/`: BAML client for AI integration for independently interacting with blockchain infrastructure
 - `app_name/`: GitHub bot implementation
 
 ---
