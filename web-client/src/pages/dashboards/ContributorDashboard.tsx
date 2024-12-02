@@ -29,6 +29,7 @@ export function ContributorDashboard() {
       try {
         setLoading(true)
         const response = await getRequest('/repositories/all')
+        console.log('RESONSE:: ', response.data.data.repositories)
         setRepositories(
           Array.isArray(response.data.data.repositories)
             ? response.data.data.repositories

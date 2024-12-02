@@ -4,15 +4,15 @@ import { donateToRepository, registerRepository, assignStakeToIssue, distributeS
 async function main() {
     const repoName = 'sample-repo-v1';
     const issueName = 'issue1';
-    const amount = '10';
+    const amount = '0.01';
 
     // donate to repo
     // const donateToRepo = await donateToRepository(repoName, amount);
     // console.log('Donated to repo:', donateToRepo);
 
     // register repo
-    // const registerRepo = await registerRepository(repoName);
-    // console.log('Registered repo:', registerRepo);
+    const registerRepo = await registerRepository(repoName);
+    console.log('Registered repo:', registerRepo);
 
     // wallet balance
     // const balance = await getWalletBalance();
@@ -23,8 +23,8 @@ async function main() {
     // console.log('Assigned stake to issue:', assignStake);
 
     // distribute stake to resolvers
-    const distributeStake = await distributeStakeToResolvers(repoName, issueName, ['0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000001', '0x0000000000000000000000000000000000000002'], ['5', '5', '5']);
-    console.log('Distributed stake to resolvers:', distributeStake);
+    // const distributeStake = await distributeStakeToResolvers(repoName, issueName, ['0x0000000000000000000000000000000000000000',], ['5']);
+    // console.log('Distributed stake to resolvers:', distributeStake);
 }
 
 main();

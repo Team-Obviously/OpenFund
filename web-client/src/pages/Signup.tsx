@@ -81,7 +81,7 @@ const LoginPage: React.FC<LoginPageProps> = ({
 
     try {
       // Create account in backend
-      await handleGithubAuth()
+      // await handleGithubAuth()
       const response = await postRequest('/auth/signup', {
         oktoAuthResponse,
         userDetails: {

@@ -142,14 +142,14 @@ export const donateToRepository = catchAsync(
     repository.donations.push(donation);
     await repository.save();
 
-    // Donate to repository on blockchain
-    try {
-      const tx = await donateToRepositoryBlockchain(repository.name, String(amount));
-      console.log('TX in DONATE TO REPO::: ', tx);
+    // // Donate to repository on blockchain
+    // try {
+    //   const tx = await donateToRepositoryBlockchain(repository.name, String(amount));
+    //   console.log('TX in DONATE TO REPO::: ', tx);
 
-    } catch (error) {
-      console.error('Error in DONATE TO REPO::: ', error);
-    }
+    // } catch (error) {
+    //   console.error('Error in DONATE TO REPO::: ', error);
+    // }
 
     res.status(200).json({
       status: "success",
