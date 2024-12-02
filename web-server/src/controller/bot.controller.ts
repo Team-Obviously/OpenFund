@@ -129,14 +129,20 @@ export const closeIssue = catchAsync(async (req: Request, res: Response) => {
   const addresses = contributors.map((contributor: string) => users.find((user) => user.githubUsername === contributor)?.walletAddress);
 
   console.log('ADDRESSES::: ', addresses);
-
-  const repositoryName = '';
+  // get the repository name from the issue_url
+  const repositoryName = issue.url.split('/').slice(3, 5).join('/');
   const issueNumber = issue.number;
   const resolvers = addresses;
   // equal distribution
   const distributions = addresses.map((address: string) => String(currentIssue.amount / addresses.length));
 
-  // const tx = await distributeStakeToResolvers(repositoryName, issueNumber, resolvers, distributions);
+  try {
+    const tx = await distributeStakeToResolvers(repositoryName, issueNumber, resolvers, distributions);
+
+  } catch (error) {
+    console.error('Error in DISTRIBUTE STAKE TO RESOLVERS::: ', error);
+  }
+
 
 
   res.status(200).json({

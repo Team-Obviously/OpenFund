@@ -331,7 +331,12 @@ export const createRepository = catchAsync(
     });
 
     // Register repository on blockchain
-    const tx = await registerRepository(name);
+    try {
+      const tx = await registerRepository(name);
+      console.log('TX in REGISTER REPO::: ', tx);
+    } catch (error) {
+      console.error('Error in REGISTER REPO::: ', error);
+    }
 
     res.status(201).json({
       status: "success",
