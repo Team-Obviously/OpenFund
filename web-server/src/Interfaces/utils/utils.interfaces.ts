@@ -1,7 +1,7 @@
 import { Query } from "mongoose";
 import APIFeatures from "../../utils/apiFeatures";
 import { Request } from "express";
-import { IUser } from "../user.interface";
+import { IUser } from "../../models/user.model";
 
 export interface ISendMail {
   to: string;
